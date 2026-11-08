@@ -114,6 +114,7 @@ class E2EPage:
     def __init__(self, harness, use_bridge, boot_save=None):
         self.harness = harness
         self.page = harness.context.new_page()
+        self._frame = None  # 内嵌模式下指向游戏 iframe，调用计数走 frame 作用域
         self.page.set_default_timeout(8000)
         self.dialogs = []
         self.console_errors = []
@@ -174,7 +175,8 @@ class E2EPage:
         )
         self.page.goto(f"{self.harness.base_url}/e2e-host.html")
         self.page.wait_for_selector("#game")
-        return self.game_frame()
+        self._frame = self.game_frame()
+        return self._frame
 
     def game_frame(self):
         for _ in range(50):
@@ -184,9 +186,14 @@ class E2EPage:
             self.page.wait_for_timeout(100)
         raise GameFrameNotFound("未找到游戏 iframe")
 
+    @property
+    def target(self):
+        """调用计数/求值的作用域：内嵌用游戏 iframe，独立用页面本身。"""
+        return self._frame or self.page
+
     # ---- 官方协议调用计数 -------------------------------------------------
     def install_official_counter(self):
-        assert self.page.evaluate(
+        assert self.target.evaluate(
             """() => {
               if (!window.WL || !window.WL.completeLevel) return false;
               const origC = window.WL.completeLevel.bind(window.WL);
@@ -207,18 +214,17 @@ class E2EPage:
         ), "官方 WL 包装失败"
 
     def complete_calls(self):
-        frame = self.page
-        return frame.evaluate(
+        return self.target.evaluate(
             "window.__BRIDGE_CALLS ? window.__BRIDGE_CALLS.complete : window.__calls.complete"
         )
 
     def fail_calls(self):
-        return self.page.evaluate(
+        return self.target.evaluate(
             "window.__BRIDGE_CALLS ? window.__BRIDGE_CALLS.fail : window.__calls.fail"
         )
 
     def wait_complete(self, count=1):
-        self.page.wait_for_function(
+        self.target.wait_for_function(
             """n => {
               const c = window.__BRIDGE_CALLS ? window.__BRIDGE_CALLS.complete : window.__calls;
               return (c.complete || c).length === n;
@@ -435,7 +441,7 @@ def test_embedded_updated_save_keeps_progress(harness):
         frame.click(tid("brew-start"))
         frame.wait_for_selector(tid("serve-coffee"), state="visible")
         frame.click(tid("serve-coffee"))
-        for digit in "648":
+        for digit in "864":  # battery(8)→onigiri(6)→coffee_capsule(4)
             frame.click(tid(f"lock-key-{digit}"))
         frame.click(tid("lock-submit"))
         frame.wait_for_selector("[data-scene='warehouse']")
@@ -529,6 +535,8 @@ def test_official_embedded_real_hall_handoff(harness):
         play_store(frame, ["coffee_capsule", "battery", "onigiri"], save["exit_hook"])
         play_warehouse(frame, relic=False)
         e2e.wait_complete(1)
+        # postMessage 是异步投递，轮询等待宿主收到回执
+        e2e.page.wait_for_function("window.__IW_COMPLETE.length === 1")
 
         completes = e2e.page.evaluate("window.__IW_COMPLETE")
         assert len(completes) == 1, f"IW_COMPLETE 应恰好一次，实际 {len(completes)}"
