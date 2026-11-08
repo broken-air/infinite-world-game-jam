@@ -42,6 +42,13 @@ class BrowserHarness:
             raise RuntimeError("BrowserHarness has not started")
         return self._page
 
+    @property
+    def context(self):
+        """暴露浏览器上下文，供需要每用例独立 page 的测试（如 e2e.py）使用。"""
+        if self._context is None:
+            raise RuntimeError("BrowserHarness has not started")
+        return self._context
+
     def start(self):
         if self._server is not None:
             return self
