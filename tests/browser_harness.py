@@ -16,6 +16,11 @@ class _QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, _format, *args):
         pass
 
+    def end_headers(self):
+        # 模拟正式大厅的 CORS 配置：沙盒 iframe（不透明源）加载 ES Module 必需
+        self.send_header("Access-Control-Allow-Origin", "*")
+        super().end_headers()
+
 
 class BrowserHarness:
     def __init__(self, game_dir=GAME_DIR, host="127.0.0.1", port=0, headless=True):
@@ -41,6 +46,13 @@ class BrowserHarness:
         if self._page is None:
             raise RuntimeError("BrowserHarness has not started")
         return self._page
+
+    @property
+    def context(self):
+        """暴露浏览器上下文，供需要每用例独立 page 的测试（如 e2e.py）使用。"""
+        if self._context is None:
+            raise RuntimeError("BrowserHarness has not started")
+        return self._context
 
     def start(self):
         if self._server is not None:
