@@ -1,0 +1,259 @@
+/* 仓库场景样式（B 所有）：装配台、接线板、旋钮与传送门表现 */
+
+.scene--warehouse {
+  --warehouse-ink: #cfe6f2;
+  --warehouse-dim: #7e97a6;
+  --warehouse-line: #2a4657;
+  --warehouse-glow: #6fd8ff;
+  --warehouse-warm: #ffb457;
+  color: var(--warehouse-ink);
+}
+
+.warehouse-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(ellipse at 50% 120%, #0d2534 0%, transparent 60%),
+    linear-gradient(180deg, #07141b 0%, #0a1c26 100%);
+}
+
+.warehouse-board {
+  display: grid;
+  grid-template-columns: 1.1fr 1.4fr 1fr;
+  grid-template-areas:
+    'assembly wiring calibration'
+    'portal portal portal';
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.area-title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--warehouse-dim);
+}
+
+.assembly-area { grid-area: assembly; }
+.wiring-area { grid-area: wiring; }
+.calibration-area { grid-area: calibration; }
+.portal-area { grid-area: portal; }
+
+/* 组件与轮廓 */
+.part-tray,
+.slot-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.part-chip,
+.part-slot {
+  flex: 1;
+  padding: 8px 6px;
+  font-size: 13px;
+  border: 1px solid var(--warehouse-line);
+  border-radius: 6px;
+  background: #0e2230;
+  color: var(--warehouse-ink);
+  cursor: pointer;
+}
+
+.part-chip[aria-pressed='true'] {
+  border-color: var(--warehouse-glow);
+  box-shadow: 0 0 8px rgba(111, 216, 255, 0.45);
+}
+
+.part-chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.part-slot {
+  border-style: dashed;
+  background: transparent;
+  color: var(--warehouse-dim);
+}
+
+.part-slot[data-filled='true'] {
+  border-style: solid;
+  border-color: var(--warehouse-glow);
+  color: var(--warehouse-ink);
+  box-shadow: inset 0 0 10px rgba(111, 216, 255, 0.2);
+}
+
+/* 接线板 */
+.wiring-board {
+  position: relative;
+  height: 130px;
+  border: 1px solid var(--warehouse-line);
+  border-radius: 8px;
+  background: #081821;
+}
+
+.cable-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cable-line {
+  stroke: var(--warehouse-glow);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(111, 216, 255, 0.6));
+}
+
+.wiring-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid var(--warehouse-line);
+  border-radius: 999px;
+  background: #0e2230;
+  color: var(--warehouse-ink);
+  cursor: pointer;
+}
+
+.wiring-node[aria-pressed='true'] {
+  border-color: var(--warehouse-warm);
+  color: var(--warehouse-warm);
+  box-shadow: 0 0 8px rgba(255, 180, 87, 0.5);
+}
+
+.wiring-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* 旋钮与波形 */
+.dial-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dial {
+  display: grid;
+  grid-template-columns: 34px 22px 26px 1fr;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 1px solid var(--warehouse-line);
+  border-radius: 6px;
+}
+
+.dial[data-locked='true'] {
+  border-color: #79e6a3;
+  box-shadow: 0 0 8px rgba(121, 230, 163, 0.4);
+}
+
+.dial-label { font-size: 12px; color: var(--warehouse-dim); }
+.dial-value { font-size: 14px; text-align: center; }
+
+.dial-up {
+  padding: 2px 6px;
+  border: 1px solid var(--warehouse-line);
+  border-radius: 4px;
+  background: #0e2230;
+  color: var(--warehouse-ink);
+  cursor: pointer;
+}
+
+.dial-wave { width: 100%; height: 30px; }
+
+.wave-target {
+  fill: none;
+  stroke: var(--warehouse-warm);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  opacity: 0.85;
+}
+
+.wave-current {
+  fill: none;
+  stroke: var(--warehouse-glow);
+  stroke-width: 1.5;
+}
+
+.dial-note {
+  margin: 0;
+  font-size: 12px;
+  color: #79e6a3;
+}
+
+/* 传送门 */
+.portal-area {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--warehouse-line);
+  border-radius: 8px;
+  background: rgba(8, 24, 33, 0.7);
+}
+
+.portal svg { width: 110px; height: 110px; }
+
+.portal-ring {
+  fill: none;
+  stroke: var(--warehouse-line);
+  stroke-width: 2;
+}
+
+.portal-core { fill: #12303f; }
+
+.portal[data-state='open'] .portal-ring {
+  stroke: var(--warehouse-glow);
+  transform-origin: 60px 60px;
+  animation: portal-spin 3.2s linear infinite;
+}
+
+.portal[data-state='open'] .portal-core {
+  fill: var(--warehouse-glow);
+  filter: drop-shadow(0 0 12px rgba(111, 216, 255, 0.9));
+  animation: portal-pulse 1.6s ease-in-out infinite;
+}
+
+.portal[data-state='open'] .portal-ring--mid { animation-direction: reverse; animation-duration: 2.4s; }
+
+@keyframes portal-spin {
+  from { transform: rotate(0deg) scale(1); opacity: 0.9; }
+  50% { transform: rotate(180deg) scale(1.04); opacity: 1; }
+  to { transform: rotate(360deg) scale(1); opacity: 0.9; }
+}
+
+@keyframes portal-pulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+.portal-start {
+  justify-self: start;
+  padding: 10px 22px;
+  font-size: 15px;
+}
+
+.portal-start:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* 反馈文案 */
+.scene-feedback {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 13px;
+  color: var(--warehouse-ink);
+  opacity: 0.9;
+}

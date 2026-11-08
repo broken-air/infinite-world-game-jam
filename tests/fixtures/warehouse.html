@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>仓库场景测试夹具</title>
+  <link rel="stylesheet" href="../../game/css/base.css">
+</head>
+<body>
+  <main class="game-shell">
+    <section class="stage-frame" aria-label="仓库场景测试区">
+      <div id="scene-container"></div>
+    </section>
+    <p>完成交接次数：<span id="complete-count" data-testid="complete-count">0</span></p>
+    <p>有效交互：<span id="interaction-count" data-testid="interaction-count">0</span></p>
+    <p>已播放声音：<span id="sound-log" data-testid="sound-log"></span></p>
+    <p>音频未解锁安全性：<span id="audio-check" data-testid="audio-check">pending</span></p>
+  </main>
+
+  <script type="module">
+    import { mountWarehouseScene } from '../../game/js/warehouse-scene.js';
+    import { createAudioManager } from '../../game/js/audio.js';
+
+    const params = new URLSearchParams(location.search);
+    const hasSanityRelic = params.get('relic') === '1';
+
+    const container = document.querySelector('#scene-container');
+    const completeCount = document.querySelector('#complete-count');
+    const interactionCount = document.querySelector('#interaction-count');
+    const soundLog = document.querySelector('#sound-log');
+
+    const audio = createAudioManager();
+    try {
+      audio.play('warehouse.portal');
+      audio.startAmbience();
+      audio.stopAmbience();
+      document.querySelector('#audio-check').textContent = 'safe';
+    } catch (error) {
+      document.querySelector('#audio-check').textContent = `threw: ${error.message}`;
+    }
+
+    let completeCalls = 0;
+    let interactions = 0;
+
+    const api = {
+      getHintLevel: () => 0,
+      registerInteraction() {
+        interactions += 1;
+        interactionCount.textContent = String(interactions);
+      },
+      playSound(id) {
+        soundLog.textContent += `${id},`;
+      },
+      hasSanityRelic,
+      completeLevel() {
+        completeCalls += 1;
+        completeCount.textContent = String(completeCalls);
+      },
+    };
+
+    window.__warehouseHandle = mountWarehouseScene(container, api);
+  </script>
+</body>
+</html>
