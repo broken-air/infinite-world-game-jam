@@ -5,12 +5,12 @@
 
 /**
  * 柜台商品固定价格表（单位：元）。
- * @type {Readonly<{onigiri: 6, coffee_capsule: 4, battery: 8}>}
+ * @type {Readonly<{onigiri: 16, coffee_capsule: 24, battery: 38}>}
  */
 export const PRODUCTS = Object.freeze({
-  onigiri: 6,
-  coffee_capsule: 4,
-  battery: 8,
+  onigiri: 16,
+  coffee_capsule: 24,
+  battery: 38,
 });
 
 const PRODUCT_COUNT = Object.keys(PRODUCTS).length;
@@ -89,7 +89,7 @@ export function serveCoffee(state) {
 }
 
 /**
- * 读取小票动态密码：按扫码顺序拼接商品价格；未扫满三件时密码尚不可用，返回 null。
+ * 读取小票动态密码：按扫码顺序拼接商品价格个位（小票红字）；未扫满三件时返回 null。
  * @param {StoreState} state
  * @returns {string|null}
  */
@@ -97,7 +97,7 @@ export function getWarehouseCode(state) {
   if (state.receiptOrder.length !== PRODUCT_COUNT) {
     return null;
   }
-  return state.receiptOrder.map((id) => String(PRODUCTS[id])).join('');
+  return state.receiptOrder.map((id) => String(PRODUCTS[id] % 10)).join('');
 }
 
 /**

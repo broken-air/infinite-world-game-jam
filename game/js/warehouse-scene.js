@@ -24,12 +24,12 @@ const DIALS = [
 
 const DIAL_MAX = 4;
 
-// 接线板固定坐标（百分比），与图纸上的能量方向一致：frame → energy → stabilizer → focus
+// 接线板固定坐标（百分比），与图纸方向一致：能源 → 稳定器 → 聚焦环 → 门框
 const NODE_POS = {
-  frame: { x: 10, y: 52 },
-  energy: { x: 36, y: 30 },
-  stabilizer: { x: 62, y: 52 },
-  focus: { x: 88, y: 30 },
+  energy: { x: 10, y: 40 },
+  stabilizer: { x: 36, y: 40 },
+  focus: { x: 62, y: 40 },
+  frame: { x: 88, y: 40 },
 };
 
 const CABLE_ROUTE = [
@@ -48,6 +48,28 @@ function ensureStylesheet() {
   link.href = new URL('../css/warehouse.css', import.meta.url).href;
   document.head.append(link);
   stylesheetInjected = true;
+}
+
+function partVisual(partId, outline = false) {
+  const shapes = {
+    energy: `
+      <path class="part-shell" d="M30 16H90L106 34V94L90 108H30L14 94V34Z"/>
+      <rect class="part-detail" x="30" y="32" width="60" height="58" rx="9"/>
+      <path class="part-metal" d="M43 43h10v27H43zM67 43h10v27H67zM54 82h12v9H54z"/>
+      <circle class="part-detail" cx="60" cy="78" r="5"/>`,
+    stabilizer: `
+      <path class="part-shell" d="M35 15H85L96 31V91L86 106H34L24 91V31Z"/>
+      <path class="part-detail" d="M39 27H81V86H39Z M25 96H95V108H25Z"/>
+      <path class="part-metal" d="M31 38H89M31 49H89M31 60H89M31 71H89M31 82H89"/>
+      <circle class="part-metal" cx="30" cy="91" r="8"/><circle class="part-metal" cx="90" cy="91" r="8"/>`,
+    focus: `
+      <path class="part-shell" d="M60 10L91 21L108 49L101 85L77 108H43L19 85L12 49L29 21Z"/>
+      <circle class="part-detail" cx="60" cy="59" r="39"/>
+      <circle class="part-metal" cx="60" cy="59" r="27"/>
+      <circle class="part-detail" cx="60" cy="59" r="14"/>
+      <path class="part-metal" d="M60 17V27M60 91V101M18 59H28M92 59H102M38 25L45 33M75 85L82 93"/>`,
+  };
+  return `<svg class="part-visual part-visual--${partId}" viewBox="0 0 120 120" data-outline="${outline}" aria-hidden="true">${shapes[partId]}</svg>`;
 }
 
 function waveformPoints(amplitude, frequency, phase, width, height) {
@@ -106,12 +128,26 @@ export function mountWarehouseScene(container, api) {
               <circle class="portal-ring portal-ring--mid" cx="60" cy="60" r="38"></circle>
               <circle class="portal-ring portal-ring--inner" cx="60" cy="60" r="24"></circle>
               <circle class="portal-core" cx="60" cy="60" r="12"></circle>
+              <g class="portal-world-mark" data-testid="portal-world-mark" data-world-mark="hollow-eye">
+                <path d="M42 60 Q60 43 78 60 Q60 77 42 60Z"></path>
+                <circle cx="60" cy="60" r="7"></circle>
+                <path d="M60 47V53M60 67V73M47 60H51M69 60H73"></path>
+              </g>
             </svg>
           </div>
           <button class="scene-action portal-start" type="button" data-testid="start-portal" data-action="start-portal">启动传送门</button>
         </div>
       </div>
       <p class="scene-feedback" data-testid="warehouse-feedback" role="status">按图纸安装组件、连接导管，再对照背面的目标波形校准旋钮。</p>
+      <section class="ending-panel" data-testid="ending-panel" aria-live="polite" hidden>
+        <div class="ending-paper">
+          <span class="ending-kicker">夜班记录 · 终页</span>
+          <h2>夜班结束</h2>
+          <p>传送门在雨声里稳定下来。柜台上的硬币微微发烫，陌生印记与图纸的终点悄然重合。</p>
+          <p>你回头时，客人早已移开视线——仿佛他早就知道，这扇门会通向哪里。</p>
+          <strong>下一班，在门的另一侧等你。</strong>
+        </div>
+      </section>
     </div>`;
 
   const feedback = root.querySelector('[data-testid="warehouse-feedback"]');
@@ -122,6 +158,7 @@ export function mountWarehouseScene(container, api) {
   const dialPanel = root.querySelector('[data-testid="dial-panel"]');
   const portal = root.querySelector('[data-testid="portal"]');
   const startButton = root.querySelector('[data-testid="start-portal"]');
+  const endingPanel = root.querySelector('[data-testid="ending-panel"]');
 
   function setFeedback(message) {
     feedback.textContent = message;
@@ -139,7 +176,8 @@ export function mountWarehouseScene(container, api) {
       button.dataset.action = 'select-part';
       button.dataset.installed = String(installed);
       button.setAttribute('aria-pressed', String(selectedPart === part.id));
-      button.textContent = part.label;
+      button.setAttribute('aria-label', part.label);
+      button.innerHTML = `${partVisual(part.id)}<span class="part-label">${part.label}</span>`;
       if (installed) button.disabled = true;
       button.addEventListener('click', onSelectPart);
       partTray.append(button);
@@ -156,7 +194,9 @@ export function mountWarehouseScene(container, api) {
       slot.dataset.slotId = part.id;
       slot.dataset.action = 'install-part';
       slot.dataset.filled = String(state.parts[part.id] !== null);
-      slot.textContent = state.parts[part.id] !== null ? PARTS.find((p) => p.id === part.id).label : '轮廓';
+      slot.dataset.shape = part.id;
+      slot.setAttribute('aria-label', `${part.label}安装轮廓`);
+      slot.innerHTML = `${partVisual(part.id, true)}<span class="part-label">${state.parts[part.id] !== null ? part.label : '待安装'}</span>`;
       slot.addEventListener('click', () => onInstallPart(part.id));
       slotRow.append(slot);
     }
@@ -363,6 +403,8 @@ export function mountWarehouseScene(container, api) {
     api.playSound('warehouse.portal');
     api.registerInteraction();
     setFeedback('传送门稳定展开了。冷光漫过货架——夜班结束的钟声响起。');
+    endingPanel.hidden = false;
+    root.classList.add('is-complete');
     api.completeLevel();
   }
 

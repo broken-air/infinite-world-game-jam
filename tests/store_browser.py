@@ -123,6 +123,9 @@ class StoreFixturePage:
             "[data-testid^='receipt-line-']", "els => els.map(e => e.dataset.lineId)"
         )
         receipt_text = self.page.inner_text("[data-testid='closeup-card']")
+        self.last_receipt_red_digits = self.page.eval_on_selector_all(
+            ".receipt-code-digit", "els => els.map(e => e.textContent).join('')"
+        )
         self.page.click(tid("closeup-close"))
         self.page.wait_for_selector(tid("store-closeup"), state="hidden")
         return line_ids, receipt_text
@@ -166,6 +169,15 @@ class StoreFixturePage:
         self.page.click(tid("brew-start"))
         self.page.wait_for_selector(tid("serve-coffee"), state="visible")
         self.page.click(tid("serve-coffee"))
+        self.page.wait_for_selector(tid("payment-closeup"), state="visible")
+        assert self.page.get_attribute(
+            tid("payment-world-mark"), "data-world-mark"
+        ) == "hollow-eye"
+        payment_blueprint = self.page.inner_text(tid("payment-blueprint"))
+        assert "导管连接顺序" in payment_blueprint
+        assert "能源接口 → 稳定器 → 聚焦环 → 门框" in payment_blueprint
+        self.page.click(tid("closeup-close"))
+        self.page.wait_for_selector(tid("store-closeup"), state="hidden")
         self.page.wait_for_selector(tid("blueprint"), state="visible")
         self.page.wait_for_selector(tid("warehouse-lock"), state="visible")
 
@@ -173,6 +185,11 @@ class StoreFixturePage:
         for digit in digits:
             self.page.click(tid(f"lock-key-{digit}"))
         assert self.lock_display() == digits, f"锁屏应显示 {digits}，实际 {self.lock_display()}"
+
+    def wait_for_warehouse(self):
+        self.page.wait_for_function(
+            "window.__storeHarness.state.enterWarehouseCalls === 1", timeout=4000
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -187,9 +204,9 @@ def test_main_path_drag_scan_to_unlock(store):
     assert page.is_hidden(tid("warehouse-lock"))
     assert page.is_hidden(tid("blueprint"))
     # 价签可读
-    assert page.inner_text(tid("price-tag-onigiri")) == "¥6"
-    assert page.inner_text(tid("price-tag-coffee_capsule")) == "¥4"
-    assert page.inner_text(tid("price-tag-battery")) == "¥8"
+    assert page.inner_text(tid("price-tag-onigiri")) == "¥16"
+    assert page.inner_text(tid("price-tag-coffee_capsule")) == "¥24"
+    assert page.inner_text(tid("price-tag-battery")) == "¥38"
 
     order = ["battery", "onigiri", "coffee_capsule"]
     interactions_before = store.state()["interactions"]
@@ -201,18 +218,24 @@ def test_main_path_drag_scan_to_unlock(store):
     # 图纸近景
     page.click(tid("blueprint"))
     page.wait_for_selector(tid("blueprint-closeup"))
-    assert "仓库" in page.inner_text(tid("blueprint-closeup"))
+    blueprint_text = page.inner_text(tid("blueprint-closeup"))
+    assert "仓库" in blueprint_text
+    assert "导管连接顺序" in blueprint_text
+    assert "能源接口 → 稳定器 → 聚焦环 → 门框" in blueprint_text
     page.click(tid("closeup-close"))
     page.wait_for_selector(tid("store-closeup"), state="hidden")
 
     # 小票近景：价格序列 = 扫码顺序 → 864
     line_ids, receipt_text = store.receipt_line_ids()
     assert line_ids == order, f"小票顺序应等于扫码顺序 {order}，实际 {line_ids}"
-    for price in ("¥8", "¥6", "¥4"):
+    for price in ("¥38", "¥16", "¥24"):
         assert price in receipt_text, f"小票近景应含 {price}"
+    assert store.last_receipt_red_digits == "864", "小票应按扫码顺序用红字标出价格个位"
+    assert "红字即门锁顺序" not in receipt_text, "不得直接揭示红字与门锁的关系"
 
     store.press_lock("864")
     page.click(tid("lock-submit"))
+    store.wait_for_warehouse()
 
     state = store.state()
     assert state["enterWarehouseCalls"] == 1, f"enterWarehouse 应恰好调用一次，实际 {state['enterWarehouseCalls']}"
@@ -242,6 +265,7 @@ def test_click_only_path_alternative_order(store):
 
     store.press_lock("648")
     page.click(tid("lock-submit"))
+    store.wait_for_warehouse()
     assert store.state()["enterWarehouseCalls"] == 1, "点击路径完整流程后应恰好解锁一次"
     store.assert_clean("点击路径")
 
@@ -288,6 +312,7 @@ def test_wrong_password_keeps_progress(store):
 
     store.press_lock("864")
     page.click(tid("lock-submit"))
+    store.wait_for_warehouse()
     assert store.state()["enterWarehouseCalls"] == 1, "错误后输入正确密码应解锁"
     assert "store.lock" in store.state()["sounds"], "错误开锁应播放 store.lock"
     store.assert_clean("错误密码")
@@ -332,6 +357,36 @@ def test_destroy_then_remount_no_listener_leak(store):
     store.assert_clean("destroy/重挂载")
 
 
+def test_customer_and_door_animation(store):
+    """顾客有真实人物图；解锁先播放开门动画，再恰好切场一次。"""
+    page = store.page
+    portrait = page.locator(tid("customer-portrait"))
+    assert portrait.is_visible(), "营业区应显示顾客人物图"
+    assert portrait.evaluate("img => img.complete && img.naturalWidth > 0"), "顾客图片应成功加载"
+
+    store.run_scan_phase(["onigiri", "coffee_capsule", "battery"], mode="click")
+    store.run_coffee_phase(mode="click")
+    store.press_lock("648")
+    page.click(tid("lock-submit"))
+    assert store.state()["enterWarehouseCalls"] == 0, "开门动画期间不得立即切场"
+    assert page.get_attribute(tid("warehouse-door"), "data-state") == "opening"
+    store.wait_for_warehouse()
+    assert store.state()["enterWarehouseCalls"] == 1
+    store.assert_clean("顾客与开门动画")
+
+
+def test_destroy_cancels_door_transition(store):
+    """开门途中销毁场景后，计时器不得再进入仓库。"""
+    store.run_scan_phase(["onigiri", "coffee_capsule", "battery"], mode="click")
+    store.run_coffee_phase(mode="click")
+    store.press_lock("648")
+    store.page.click(tid("lock-submit"))
+    assert store.call("destroy()")
+    store.page.wait_for_timeout(1550)
+    assert store.state()["enterWarehouseCalls"] == 0
+    store.assert_clean("开门途中销毁")
+
+
 TESTS = [
     test_main_path_drag_scan_to_unlock,
     test_click_only_path_alternative_order,
@@ -339,6 +394,8 @@ TESTS = [
     test_wrong_password_keeps_progress,
     test_update_context_keeps_progress,
     test_destroy_then_remount_no_listener_leak,
+    test_customer_and_door_animation,
+    test_destroy_cancels_door_transition,
 ]
 
 

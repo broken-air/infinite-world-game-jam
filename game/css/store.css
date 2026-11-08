@@ -396,7 +396,502 @@
 .blueprint-plan i { flex: 0 0 30px; height: 1px; background: #53716f; }
 .closeup-blueprint p { max-width: 46ch; margin: 0; color: #adc1c0; line-height: 1.9; font-size: 13px; }
 
+/* ---------------- 悬疑手绘视觉层：旧纸、暗红、氧化金属 ---------------- */
+.store-scene {
+  background:
+    linear-gradient(90deg, #0007, transparent 18% 82%, #0007),
+    radial-gradient(ellipse at 48% 12%, #59523924 0%, transparent 52%),
+    repeating-linear-gradient(97deg, transparent 0 27px, #b9ad8310 28px, transparent 29px 61px),
+    #101815;
+}
+.store-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .28;
+  background: repeating-radial-gradient(circle at 20% 30%, transparent 0 3px, #d6c7a008 4px, transparent 5px 11px);
+  mix-blend-mode: screen;
+}
+.store-narration {
+  border-bottom-color: #4d5143;
+  background: #0c110fee;
+  color: #c1ad7d;
+  font-family: "STKaiti", "KaiTi", serif;
+  letter-spacing: .08em;
+  box-shadow: 0 4px 18px #0008;
+}
+.store-glass {
+  border-color: #3e4b43;
+  border-radius: 45% 45% 2px 2px / 5% 5% 2px 2px;
+  background:
+    repeating-linear-gradient(103deg, transparent 0 12px, #9ba99618 13px, transparent 14px 24px),
+    radial-gradient(ellipse at 50% 100%, #35433b, #080d0c 75%);
+  color: #899485;
+  box-shadow: inset 0 0 24px #000, 0 3px 0 #080b09;
+}
+.store-shelf {
+  border-color: #49483a;
+  background:
+    linear-gradient(90deg, #0004, transparent 15% 85%, #0005),
+    repeating-linear-gradient(2deg, #25271f 0 8px, #282a21 9px 12px, #22241d 13px 21px);
+  box-shadow: inset 0 0 28px #0009, 0 5px 0 #090b08;
+}
+.product {
+  border-color: #4b5144;
+  border-radius: 2px 5px 3px 4px;
+  background: linear-gradient(100deg, #20271f, #171d18);
+  box-shadow: inset 0 0 12px #0005;
+}
+.product-name { color: #d0c6ab; }
+.product-art { filter: sepia(.3) saturate(.65); box-shadow: 2px 3px 0 #0006; }
+.price-tag {
+  position: relative;
+  border: 1px solid #796e51;
+  border-radius: 1px 3px 2px 1px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, #493e2410 4px),
+    #bdad82;
+  color: #30291f;
+  box-shadow: 1px 2px 0 #0007;
+  font-family: "STKaiti", "KaiTi", serif;
+  font-weight: 700;
+  transform: rotate(-1deg);
+}
+.store-bag {
+  border-color: #545749;
+  background: #101510e8;
+  box-shadow: inset 0 0 18px #0006;
+}
+.bag-chip {
+  border-color: #7a8068;
+  border-radius: 2px 4px 2px 5px;
+  background: #22291f;
+  color: #c5c9aa;
+}
+.customer-bubble {
+  border: 1px solid #82765a;
+  border-radius: 3px 8px 4px 7px;
+  background:
+    repeating-linear-gradient(3deg, transparent 0 5px, #493e2410 6px),
+    #c1b28c;
+  color: #2b2921;
+  box-shadow: 3px 4px 0 #0006;
+  font-family: "STKaiti", "KaiTi", serif;
+  transform: rotate(.4deg);
+}
+.customer-figure {
+  position: relative;
+  border: 1px solid #44483d;
+  border-radius: 45% 48% 8% 10%;
+  background: linear-gradient(#1c201b 0 36%, #31372e 36% 72%, #20251f 72%);
+  box-shadow: 4px 5px 0 #0007;
+  filter: saturate(.55);
+}
+.customer-figure::after {
+  content: "";
+  position: absolute;
+  top: 27px;
+  left: 12px;
+  width: 22px;
+  height: 1px;
+  background: #88816b;
+  box-shadow: 0 5px 0 #111;
+  opacity: .6;
+}
+.scanner, .coffee-machine {
+  border-color: #4e5a4e;
+  background:
+    repeating-linear-gradient(100deg, transparent 0 18px, #ffffff05 19px, transparent 20px 39px),
+    linear-gradient(#29332b, #151d18);
+  box-shadow: inset 0 0 20px #0007, 0 4px 0 #090c09;
+}
+.scanner-lamp { background: #923a31; box-shadow: 0 0 12px #923a3180; }
+.receipt {
+  border-color: #8a7c5c;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 4px, #493e2410 5px),
+    #cabe9c;
+  color: #373126;
+  box-shadow: 3px 4px 0 #0006;
+  transform: rotate(-.6deg);
+}
+.cup { filter: sepia(.25) saturate(.65); box-shadow: 3px 4px 0 #0005; }
+.machine-brew, .serve-button, .blueprint-button, .closeup-close, .lock-clear, .lock-submit {
+  border-color: #596151;
+  border-radius: 2px 4px 3px 5px;
+  background: linear-gradient(105deg, #293229, #171e18);
+  color: #d2c8ac;
+  box-shadow: 0 2px 0 #080a08;
+}
+.warehouse-door {
+  border-color: #414b40;
+  background:
+    linear-gradient(90deg, transparent 49%, #090c09 50%, transparent 51%),
+    repeating-linear-gradient(90deg, #1b211b 0 22px, #20261e 23px 44px);
+  color: #939782;
+  box-shadow: inset 0 0 45px #000b, 4px 5px 0 #080a08;
+}
+.warehouse-lock {
+  border-color: #545e4e;
+  border-radius: 3px 5px 2px 4px;
+  background: linear-gradient(110deg, #20271f, #121813);
+  box-shadow: inset 0 0 18px #0007;
+}
+.lock-title { color: #b8a374; }
+.lock-input i {
+  border-color: #5b6352;
+  border-radius: 2px 3px 2px 4px;
+  background: #090e0b;
+  color: #c2c9a8;
+  box-shadow: inset 0 3px 9px #000;
+  font-family: "STKaiti", "KaiTi", serif;
+}
+.lock-key {
+  border-color: #465043;
+  border-radius: 2px 3px 2px 4px;
+  background: #222a22;
+  color: #c9c1a9;
+}
+.store-feedback {
+  border-top-color: #41483b;
+  background: #0c110fee;
+  color: #bfc6a5;
+  font-family: "STKaiti", "KaiTi", serif;
+  letter-spacing: .03em;
+}
+
+/* 近景统一为旧木框中的标本陈列，滚动不穿透到场景。 */
+.store-closeup {
+  inset: 2.5% 5%;
+  background: #050806d9;
+  backdrop-filter: blur(3px) saturate(.65);
+}
+.closeup-card {
+  position: relative;
+  max-width: 76%;
+  max-height: 86%;
+  overscroll-behavior: contain;
+  border: 1px solid #8b7b58;
+  border-radius: 3px 7px 4px 6px;
+  background:
+    repeating-linear-gradient(96deg, transparent 0 24px, #ffffff05 25px, transparent 26px 49px),
+    #182019;
+  box-shadow: 0 0 0 5px #10150f, 0 0 0 6px #474b3b, 0 24px 80px #000e;
+}
+.closeup-close {
+  z-index: 2;
+  border-color: #786c50;
+  background: #1b211a;
+}
+.closeup-receipt {
+  position: relative;
+  min-width: min(430px, 64vw);
+  padding: 22px 28px 20px;
+  border: 1px solid #a2936c;
+  background:
+    radial-gradient(circle at 12% 20%, #5d4b2520 0 2px, transparent 3px),
+    radial-gradient(circle at 88% 76%, #5d4b2524 0 3px, transparent 4px),
+    repeating-linear-gradient(2deg, transparent 0 5px, #493e2410 6px),
+    #d0c09a;
+  color: #342e22;
+  clip-path: polygon(0 1%, 7% 0, 15% 1%, 25% 0, 36% 1%, 48% 0, 59% 1%, 72% 0, 84% 1%, 100% 0, 99% 96%, 94% 100%, 86% 98%, 77% 100%, 67% 98%, 55% 100%, 43% 98%, 31% 100%, 20% 98%, 8% 100%, 1% 98%);
+  font-family: "STKaiti", "KaiTi", serif;
+  box-shadow: inset 0 0 35px #68563125;
+  transform: rotate(-.35deg);
+}
+.closeup-receipt h3 {
+  padding-bottom: 9px;
+  border-bottom: 1px solid #776949;
+  text-align: center;
+  font-weight: 600;
+}
+.closeup-receipt ol { padding-left: 1.5em; }
+.closeup-receipt li { display: flex; align-items: baseline; gap: 7px; }
+.closeup-receipt li::marker { color: #75664a; font-size: .75em; }
+.receipt-leader { flex: 1; border-bottom: 1px dotted #776b50; }
+.receipt-price { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.receipt-code-digit {
+  display: inline-block;
+  margin-left: 1px;
+  color: #942f29;
+  font-size: 1.28em;
+  font-weight: 700;
+  text-shadow: 0 0 1px #942f2940;
+  transform: rotate(-5deg) translateY(1px);
+}
+.closeup-receipt .receipt-total { border-top-color: #776949; }
+.closeup-receipt .receipt-hint { color: #6b5e43; }
+.closeup-tag {
+  border: 1px solid #9b8a61;
+  border-radius: 2px 5px 3px 4px;
+  background:
+    repeating-linear-gradient(2deg, transparent 0 5px, #493e2410 6px),
+    #c6b489;
+  color: #322a1e;
+  box-shadow: inset 0 0 24px #6d583629;
+  font-family: "STKaiti", "KaiTi", serif;
+  transform: rotate(.6deg);
+}
+.closeup-blueprint h3, .blueprint-plan { color: #c3b382; }
+
+/* 付钱特写：唯一强视觉焦点，印记与仓库传送门共用同一空眼图形。 */
+.store-closeup[data-closeup="payment"] .closeup-card { max-width: min(900px, 92%); }
+.payment-closeup {
+  display: grid;
+  grid-template-columns: minmax(180px, .75fr) minmax(360px, 1.5fr);
+  align-items: center;
+  gap: clamp(18px, 3vw, 36px);
+  min-width: min(760px, 74vw);
+  padding: 4px 10px;
+}
+.payment-objects {
+  display: grid;
+  grid-template-columns: minmax(170px, 1fr) minmax(160px, .85fr);
+  align-items: center;
+  gap: 16px;
+}
+.closeup-kicker {
+  display: block;
+  margin-bottom: 10px;
+  color: #9d8e68;
+  font-size: 12px;
+  letter-spacing: .18em;
+}
+.payment-copy h3 {
+  margin: 0 0 18px;
+  color: #ddd0ae;
+  font-family: "STKaiti", "KaiTi", serif;
+  font-size: clamp(23px, 3vw, 32px);
+  font-weight: 500;
+  letter-spacing: .08em;
+}
+.payment-copy p { margin: 0 0 10px; color: #b9b29b; font-size: 14px; line-height: 1.9; }
+.payment-copy .payment-note { color: #817e6d; font-size: 12px; }
+.coin-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid #41483a;
+  border-radius: 50%;
+  background: radial-gradient(circle, #4b4c382e 0%, #090d09 68%);
+  box-shadow: inset 0 0 40px #000;
+}
+.payment-coin { width: 88%; height: 88%; overflow: visible; filter: drop-shadow(0 13px 12px #000b); }
+.coin-shadow { fill: #0008; }
+.coin-edge { fill: #4a4a3b; stroke: #a49770; stroke-width: 2.5; }
+.coin-face { fill: #82795c; stroke: #373a30; stroke-width: 2; }
+.coin-groove { fill: none; stroke: #b0a17a; stroke-width: 1.5; stroke-dasharray: 2 4; opacity: .55; }
+.coin-scratch { fill: none; stroke: #3d4034; stroke-width: 2; stroke-linecap: round; opacity: .65; }
+.coin-world-mark { fill: none; stroke: #672720; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.coin-world-mark circle { fill: #67272018; }
+.payment-blueprint {
+  position: relative;
+  padding: 18px 16px 22px;
+  border: 1px solid #9a8b65;
+  background:
+    linear-gradient(90deg, transparent 49%, #71634518 50%, transparent 51%),
+    repeating-linear-gradient(2deg, transparent 0 5px, #493e2410 6px),
+    #c7b88f;
+  color: #373126;
+  box-shadow: 3px 5px 0 #0007;
+  font-family: "STKaiti", "KaiTi", serif;
+  transform: rotate(1.2deg);
+}
+.payment-blueprint-title { display: block; padding-bottom: 8px; border-bottom: 1px solid #776949; text-align: center; font-size: 18px; }
+.payment-blueprint-subtitle { display: block; margin-top: 12px; color: #755f3d; font-size: 12px; }
+.payment-blueprint p { margin: 8px 0 0; font-size: 15px; line-height: 1.9; }
+.payment-blueprint i { display: block; width: 70%; height: 12px; margin: 12px auto 0; border: solid #6d664e; border-width: 1px 0; border-radius: 50%; }
+.blueprint-cables { margin: 12px 0; padding: 10px 0; border: solid #5d654f; border-width: 1px 0; }
+.blueprint-cables h4 { margin: 0 0 6px; color: #c3b382; font-size: 13px; font-weight: 500; }
+.blueprint-cables p { color: #d4cbae; font-size: 15px; letter-spacing: .04em; }
+
+@media (max-width: 680px) {
+  .payment-closeup { grid-template-columns: 1fr; min-width: 56vw; gap: 12px; }
+  .payment-objects { grid-template-columns: 130px 1fr; }
+  .payment-copy h3 { margin-bottom: 8px; font-size: 20px; }
+  .payment-copy p { font-size: 12px; line-height: 1.6; }
+  .payment-blueprint { padding: 12px; }
+  .closeup-receipt { min-width: 56vw; padding: 14px 20px; }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .scanner-lamp { transition: opacity 160ms ease; }
-  .product, .bag-chip, .price-tag { transition: border-color 120ms ease, background-color 120ms ease; }
+  .product, .bag-chip, .price-tag { transition: border-color 120ms ease, background-color 120ms ease, scale 150ms ease-out; }
+  .product:not(.is-scanned):active, .price-tag:active { scale: 0.96; }
+  .store-closeup:not([hidden]) .closeup-card { animation: closeup-enter 300ms cubic-bezier(0.2, 0, 0, 1) both; }
+  .store-closeup[data-closeup="payment"]:not([hidden]) .coin-world-mark { animation: mark-settle 700ms ease-out 180ms both; }
+}
+@keyframes closeup-enter {
+  from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes mark-settle {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* B 稿正式场景：人物与仓库门是视觉中心，控件仍沿用原有交互标记。 */
+.store-scene { padding-bottom: 34px; }
+.store-layout {
+  grid-template-columns: 24% minmax(0, 1fr) 25%;
+  gap: 2%;
+  padding: 1.4% 1.8% .8%;
+}
+.store-zone--counter {
+  display: grid;
+  grid-template-rows: minmax(150px, 1fr) minmax(72px, .31fr) minmax(104px, .42fr);
+  gap: 7px;
+}
+.customer { position: relative; display: block; min-height: 0; }
+.customer-figure {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid #554c3b;
+  border-radius: 42% 42% 2px 2px / 7% 7% 2px 2px;
+  background: #0b100d;
+  box-shadow: inset 0 0 32px #0009, 5px 6px 0 #070907;
+  filter: none;
+}
+.customer-figure::after { display: none; }
+.customer-figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 24%;
+  filter: saturate(.7) contrast(1.04) brightness(.88);
+  pointer-events: none;
+  user-select: none;
+}
+.customer-bubble {
+  position: absolute;
+  z-index: 2;
+  top: 6%;
+  right: 3%;
+  width: min(61%, 270px);
+  padding: 10px 13px;
+  font-size: clamp(12px, 1.35vw, 16px);
+  line-height: 1.75;
+  pointer-events: none;
+}
+.counter-desk, .coffee-station { min-height: 0; }
+.product {
+  grid-template-columns: 30px minmax(58px, 1fr) auto;
+  min-height: 50px;
+  padding: 5px 7px;
+}
+.product-name { min-width: 0; line-height: 1.35; white-space: normal; }
+.product-art { justify-self: center; }
+.product-art--onigiri {
+  width: 30px;
+  height: 29px;
+  border: 1px solid #bcb596;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.product-art--coffee_capsule { width: 25px; height: 29px; border-radius: 45% 45% 35% 35%; }
+.product-art--battery { width: 18px; height: 31px; border: 1px solid #6d745a; }
+.store-bag { padding: 6px 8px; }
+.bag-title { line-height: 1.4; }
+
+.warehouse-door {
+  position: relative;
+  min-height: 140px;
+  overflow: hidden;
+  border: 8px solid #3d3028;
+  background: #050806;
+  perspective: 850px;
+  box-shadow: inset 0 0 35px #000, 5px 6px 0 #070806;
+}
+.door-interior {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 55% 30%, #8b83592b, transparent 55%),
+    linear-gradient(90deg, #050705, #162019 55%, #080b08);
+  opacity: .08;
+}
+.door-interior i {
+  position: absolute;
+  bottom: 0;
+  width: 28%;
+  height: 37%;
+  border: 2px solid #3c4233;
+  background: #171b14;
+}
+.door-interior i:nth-child(1) { left: 8%; }
+.door-interior i:nth-child(2) { left: 39%; height: 52%; }
+.door-interior i:nth-child(3) { right: 5%; height: 30%; }
+.door-leaf {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #4f4135;
+  background:
+    linear-gradient(90deg, #0005, transparent 18% 82%, #0006),
+    repeating-linear-gradient(90deg, #40251f 0 25px, #482922 26px 49px);
+  box-shadow: inset 0 0 45px #160b08, inset 0 0 0 12px #2a1c18;
+  transform-origin: left center;
+  backface-visibility: hidden;
+}
+.door-name {
+  padding: 8px 17px;
+  border: 1px solid #8a7652;
+  background: #b7a678;
+  color: #382a20;
+  box-shadow: 2px 3px 0 #170e0b;
+}
+.door-hint { color: #b3a58b; }
+.door-handle {
+  position: absolute;
+  right: 12%;
+  top: 48%;
+  width: 9px;
+  height: 42px;
+  border: 1px solid #a58a58;
+  border-radius: 6px;
+  background: #746043;
+  box-shadow: 0 0 0 5px #2b1c17, 2px 3px 5px #0008;
+  transform-origin: 50% 15%;
+}
+.warehouse-door.is-opening { flex: 1; border-color: #6c5b40; }
+.warehouse-door.is-opening .door-hint { color: #d1c39d; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .warehouse-door.is-opening .door-leaf { animation: warehouse-door-open 1400ms cubic-bezier(.55, .02, .25, 1) forwards; }
+  .warehouse-door.is-opening .door-handle { animation: warehouse-handle-turn 260ms ease-in-out both; }
+  .warehouse-door.is-opening .door-interior { animation: warehouse-interior-reveal 1050ms ease-out 240ms forwards; }
+}
+@keyframes warehouse-handle-turn {
+  0% { transform: rotate(0); }
+  55% { transform: rotate(28deg); }
+  100% { transform: rotate(0); }
+}
+@keyframes warehouse-door-open {
+  0%, 14% { transform: rotateY(0); filter: brightness(1); }
+  35% { transform: rotateY(-10deg); }
+  100% { transform: rotateY(-78deg); filter: brightness(.65); }
+}
+@keyframes warehouse-interior-reveal {
+  from { opacity: .08; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .warehouse-door.is-opening .door-leaf { opacity: 0; transition: opacity 100ms linear; }
+  .warehouse-door.is-opening .door-interior { opacity: 1; }
+}
+@media (max-width: 680px) {
+  .store-layout { grid-template-columns: 25% minmax(0, 1fr) 26%; gap: 1.5%; }
+  .customer-bubble { width: 68%; padding: 6px 8px; font-size: 11px; }
+  .product { grid-template-columns: 24px minmax(40px, 1fr) auto; gap: 4px; padding: 4px; }
+  .product-art { scale: .8; }
 }

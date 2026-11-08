@@ -15,8 +15,8 @@ function snapshot(state) {
   return structuredClone(state);
 }
 
-test('PRODUCTS 固定价格表：饭团 6、咖啡胶囊 4、电池 8', () => {
-  assert.deepEqual({ ...PRODUCTS }, { onigiri: 6, coffee_capsule: 4, battery: 8 });
+test('PRODUCTS 固定价格表：饭团 16、咖啡胶囊 24、电池 38', () => {
+  assert.deepEqual({ ...PRODUCTS }, { onigiri: 16, coffee_capsule: 24, battery: 38 });
 });
 
 test('createStoreState 返回干净的初始状态', () => {

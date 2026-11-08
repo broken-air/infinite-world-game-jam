@@ -32,6 +32,7 @@ def main():
             test_partial_reset_only_clears_target_system,
             test_update_context_keeps_progress,
             test_click_only_interaction_flow,
+            test_visual_parts_and_ordered_nodes,
         ]),
         ("有遗物捷径路线", True, [
             test_audio_check_marker,
@@ -136,7 +137,14 @@ def test_full_route_without_relic(page):
     expect(page.locator("[data-testid='portal']")).to_have_attribute(
         "data-state", "open"
     )
+    expect(page.locator("[data-testid='portal-world-mark']")).to_have_attribute(
+        "data-world-mark", "hollow-eye"
+    )
     expect(page.locator("[data-testid='complete-count']")).to_have_text("1")
+    ending = page.locator("[data-testid='ending-panel']")
+    expect(ending).to_be_visible()
+    expect(ending).to_contain_text("夜班结束")
+    expect(ending).to_contain_text("硬币")
 
     start.click()
     expect(page.locator("[data-testid='complete-count']")).to_have_text("1")
@@ -164,6 +172,9 @@ def test_full_route_with_relic_skips_dials(page):
 
     expect(page.locator("[data-testid='portal']")).to_have_attribute(
         "data-state", "open"
+    )
+    expect(page.locator("[data-testid='portal-world-mark']")).to_have_attribute(
+        "data-world-mark", "hollow-eye"
     )
     expect(page.locator("[data-testid='complete-count']")).to_have_text("1")
 
@@ -255,6 +266,27 @@ def test_click_only_interaction_flow(page):
         expect(parts.nth(index)).to_have_attribute("data-action", "select-part")
     for index in range(slots.count()):
         expect(slots.nth(index)).to_have_attribute("data-action", "install-part")
+
+
+def test_visual_parts_and_ordered_nodes(page):
+    """组件使用真实轮廓，导管节点按图纸顺序水平排列，传送门不被裁切。"""
+    for part_id in ("energy", "stabilizer", "focus"):
+        expect(page.locator(f"[data-testid='part-{part_id}'] .part-visual")).to_be_visible()
+        expect(page.locator(f"[data-testid='slot-{part_id}'] .part-visual")).to_be_visible()
+
+    positions = page.locator("[data-node-id]").evaluate_all(
+        "nodes => nodes.map(node => ({ id: node.dataset.nodeId, x: node.getBoundingClientRect().x }))"
+    )
+    assert [node["id"] for node in positions] == ["energy", "stabilizer", "focus", "frame"]
+    xs = [node["x"] for node in positions]
+    assert xs == sorted(xs), f"导管节点应从左到右排列，实际 {positions}"
+
+    scene_box = page.locator("[data-scene='warehouse']").bounding_box()
+    portal_box = page.locator("[data-testid='portal']").bounding_box()
+    assert portal_box["x"] >= scene_box["x"]
+    assert portal_box["y"] >= scene_box["y"]
+    assert portal_box["x"] + portal_box["width"] <= scene_box["x"] + scene_box["width"]
+    assert portal_box["y"] + portal_box["height"] <= scene_box["y"] + scene_box["height"]
 
 
 if __name__ == "__main__":

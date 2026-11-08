@@ -19,6 +19,7 @@ const PRODUCT_NAMES = {
 };
 
 const DIGIT_KEYS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const CUSTOMER_PORTRAIT = new URL('../assets/customer.jpg', import.meta.url).href;
 
 /**
  * Mount the store scene.
@@ -39,6 +40,7 @@ export function mountStoreScene(container, api) {
   let capsuleInserted = false;
   let enteredWarehouse = false;
   let enteredDigits = [];
+  let doorTimer = null;
 
   const root = document.createElement('section');
   root.className = 'scene scene--store store-scene';
@@ -260,6 +262,7 @@ export function mountStoreScene(container, api) {
       api.registerInteraction();
       api.playSound('store.coffee');
       say('客人把一张值班图纸推了过来，还朝仓库的方向抬了抬下巴。');
+      openCloseup('payment');
     } else if (!state.coffeePrepared) {
       api.playSound('ui.click');
       say('手里还没有做好的咖啡。');
@@ -287,6 +290,7 @@ export function mountStoreScene(container, api) {
   function buildCloseup(kind, id) {
     if (kind === 'receipt') return buildReceiptCloseup();
     if (kind === 'tag') return buildTagCloseup(id);
+    if (kind === 'payment') return buildPaymentCloseup();
     return buildBlueprintCloseup();
   }
 
@@ -299,7 +303,8 @@ export function mountStoreScene(container, api) {
       const line = document.createElement('li');
       line.dataset.testid = `receipt-line-${id}`;
       line.dataset.lineId = id;
-      line.textContent = `${PRODUCT_NAMES[id]} …… ¥${PRODUCTS[id]}`;
+      const price = String(PRODUCTS[id]);
+      line.innerHTML = `<span>${PRODUCT_NAMES[id]}</span><span class="receipt-leader" aria-hidden="true"></span><span class="receipt-price">¥${price.slice(0, -1)}<strong class="receipt-code-digit">${price.at(-1)}</strong></span>`;
       list.append(line);
     }
     wrap.append(list);
@@ -312,6 +317,42 @@ export function mountStoreScene(container, api) {
     hint.className = 'receipt-hint';
     hint.textContent = '商品按扫码先后顺序排列。';
     wrap.append(hint);
+    return wrap;
+  }
+
+  function buildPaymentCloseup() {
+    const wrap = document.createElement('div');
+    wrap.className = 'payment-closeup';
+    wrap.dataset.testid = 'payment-closeup';
+    wrap.innerHTML = `
+      <div class="payment-copy">
+        <span class="closeup-kicker">客人留下的东西</span>
+        <h3>一枚硬币，一张图纸</h3>
+        <p>硬币中央刻着陌生的印记；图纸上画着传送门的导管走向。</p>
+        <p class="payment-note">他没有找零，也没有再看你。</p>
+      </div>
+      <div class="payment-objects">
+      <div class="coin-stage" aria-label="刻有陌生印记的金属硬币">
+        <svg class="payment-coin" viewBox="0 0 240 240" role="img" aria-label="硬币上的空眼印记">
+          <circle class="coin-shadow" cx="120" cy="126" r="91"></circle>
+          <circle class="coin-edge" cx="120" cy="120" r="91"></circle>
+          <circle class="coin-face" cx="120" cy="120" r="82"></circle>
+          <circle class="coin-groove" cx="120" cy="120" r="72"></circle>
+          <path class="coin-scratch" d="M72 76L91 88M158 70L148 91M69 151L94 143M154 158L169 145M104 49L109 64"></path>
+          <g class="coin-world-mark" data-testid="payment-world-mark" data-world-mark="hollow-eye">
+            <path d="M82 120 Q120 85 158 120 Q120 155 82 120Z"></path>
+            <circle cx="120" cy="120" r="13"></circle>
+            <path d="M120 94V105M120 135V146M94 120H103M137 120H146"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="payment-blueprint" data-testid="payment-blueprint">
+        <span class="payment-blueprint-title">值班图纸</span>
+        <span class="payment-blueprint-subtitle">导管连接顺序</span>
+        <p>能源接口 → 稳定器 → 聚焦环 → 门框</p>
+        <i aria-hidden="true"></i>
+      </div>
+      </div>`;
     return wrap;
   }
 
@@ -336,6 +377,10 @@ export function mountStoreScene(container, api) {
     wrap.innerHTML = `
       <h3>值班图纸（客人手绘）</h3>
       <div class="blueprint-plan" aria-hidden="true"><span>营业区</span><i></i><span>仓库内门</span><i></i><span>天台出口</span></div>
+      <div class="blueprint-cables">
+        <h4>导管连接顺序</h4>
+        <p>能源接口 → 稳定器 → 聚焦环 → 门框</p>
+      </div>
       <p>图角有一行小字：“去天台，先开仓库。门锁是三位数字——按小票上价格的先后顺序读。”</p>`;
     return wrap;
   }
@@ -377,12 +422,17 @@ export function mountStoreScene(container, api) {
       renderDigits();
       lockPanel.classList.add('is-unlocked');
       lockNote.textContent = '已解锁 · 门开了';
-      doorEl.classList.add('is-open');
-      doorHint.textContent = '内门 · 已解锁';
-      say('咔——锁舌缩了回去，仓库门开了。');
+      doorEl.classList.add('is-opening', 'is-open');
+      doorEl.dataset.state = 'opening';
+      doorHint.textContent = '内门 · 正在开启';
+      say('咔——锁舌缩了回去，门缝里的光慢慢亮了。');
       if (!enteredWarehouse) {
         enteredWarehouse = true;
-        api.enterWarehouse();
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        doorTimer = window.setTimeout(() => {
+          doorTimer = null;
+          api.enterWarehouse();
+        }, reducedMotion ? 100 : 1400);
       }
     } else {
       api.playSound('store.lock');
@@ -526,7 +576,9 @@ export function mountStoreScene(container, api) {
         <div class="store-zone store-zone--counter">
           <div class="customer">
             <div class="customer-bubble" data-testid="customer-line">夜班员，麻烦结账。</div>
-            <div class="customer-figure" aria-hidden="true"></div>
+            <div class="customer-figure">
+              <img src="${CUSTOMER_PORTRAIT}" alt="站在柜台前、微微移开视线的神秘夜班客人" data-testid="customer-portrait" draggable="false">
+            </div>
           </div>
           <div class="counter-desk">
             <div class="scanner" data-testid="scanner" data-action="scan" role="button" aria-label="扫码器">
@@ -556,9 +608,13 @@ export function mountStoreScene(container, api) {
           </div>
         </div>
         <div class="store-zone store-zone--door">
-          <div class="warehouse-door" data-testid="warehouse-door" data-action="door" role="button" aria-label="仓库门">
-            <span class="door-name">仓库</span>
-            <span class="door-hint" data-door-hint>内门 · 上锁</span>
+          <div class="warehouse-door" data-testid="warehouse-door" data-action="door" data-state="closed" role="button" aria-label="仓库门">
+            <div class="door-interior" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="door-leaf">
+              <span class="door-name">仓库</span>
+              <span class="door-hint" data-door-hint>内门 · 上锁</span>
+              <span class="door-handle" aria-hidden="true"></span>
+            </div>
           </div>
           <button class="blueprint-button" type="button" data-testid="blueprint" data-action="view-blueprint" hidden>查看值班图纸</button>
           <div class="warehouse-lock" data-testid="warehouse-lock" hidden>
@@ -625,6 +681,10 @@ export function mountStoreScene(container, api) {
 
   return {
     destroy() {
+      if (doorTimer !== null) {
+        window.clearTimeout(doorTimer);
+        doorTimer = null;
+      }
       for (const [target, type, handler, options] of listeners) {
         target.removeEventListener(type, handler, options);
       }

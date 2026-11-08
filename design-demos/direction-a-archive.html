@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>天台夜班 · 夜班记录夹</title>
+  <style>
+    :root {
+      --ink: #1b1c19;
+      --deep: #10110f;
+      --wall: #292b26;
+      --wall-2: #34362f;
+      --paper: #d8d0ba;
+      --paper-light: #eee7d3;
+      --paper-dim: #aaa38f;
+      --red: #914f45;
+      --copper: #8b6848;
+      --line: #55564d;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      margin: 0;
+      display: flow-root;
+      overflow: hidden;
+      background:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.015) 0 1px, transparent 1px 5px),
+        #151612;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      font-size: 15px;
+    }
+    button { font: inherit; }
+    button:focus-visible {
+      outline: 3px solid var(--paper-light);
+      outline-offset: 4px;
+    }
+
+    .archive {
+      height: calc(100vh - 36px);
+      margin: 18px 22px;
+      display: grid;
+      grid-template-rows: 82px minmax(0, 1fr) 30px;
+      border: 2px solid #090a08;
+      background: var(--paper);
+      box-shadow: 8px 8px 0 #080906;
+      position: relative;
+    }
+    .archive::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      opacity: .12;
+      background:
+        repeating-linear-gradient(3deg, transparent 0 3px, rgba(20,20,16,.09) 3px 4px),
+        repeating-linear-gradient(91deg, transparent 0 7px, rgba(255,255,255,.12) 7px 8px);
+      mix-blend-mode: multiply;
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: 365px minmax(0, 1fr) 326px;
+      min-height: 0;
+      background:
+        linear-gradient(95deg, rgba(255,255,255,.18), transparent 40%),
+        var(--paper);
+      border-bottom: 2px solid var(--ink);
+      position: relative;
+      z-index: 30;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      padding: 9px 18px;
+      border-right: 2px solid var(--ink);
+    }
+    .brand h1 {
+      margin: 0;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 31px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .brand small {
+      display: block;
+      margin-top: 8px;
+      font-size: 12px;
+      letter-spacing: .18em;
+      color: #555349;
+    }
+    .time {
+      padding-left: 18px;
+      border-left: 1px solid #777264;
+      font-family: "Courier New", monospace;
+      font-size: 29px;
+      font-weight: 700;
+      letter-spacing: -.06em;
+      white-space: nowrap;
+    }
+    .time span {
+      display: block;
+      margin-bottom: 3px;
+      font-family: "Microsoft YaHei", sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: .12em;
+    }
+    .archive-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-content: center;
+      gap: 7px 24px;
+      padding: 10px 24px;
+      font-size: 14px;
+      color: #403f37;
+    }
+    .archive-meta span {
+      border-bottom: 1px solid #918a78;
+      padding-bottom: 4px;
+      white-space: nowrap;
+    }
+    .archive-meta b { color: var(--ink); font-weight: 600; }
+    .scene-tabs { display: grid; grid-template-columns: 1fr 1fr; }
+    .scene-tab {
+      border: 0;
+      border-left: 2px solid var(--ink);
+      border-radius: 0;
+      background: #8e8b7e;
+      color: #22231f;
+      cursor: pointer;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      position: relative;
+    }
+    .scene-tab:hover { background: #b5ad98; }
+    .scene-tab[aria-selected="true"] {
+      background: var(--paper-light);
+      box-shadow: inset 0 5px 0 var(--red);
+    }
+    .scene-tab[aria-selected="true"]::after {
+      content: "当前页";
+      display: block;
+      margin-top: 5px;
+      font-family: "Microsoft YaHei", sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: .1em;
+      color: #676255;
+    }
+
+    .scene-wrap {
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      background: var(--wall);
+    }
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow: hidden;
+    }
+    .scene.active { display: block; }
+    .scene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 25;
+      opacity: .22;
+      background:
+        radial-gradient(ellipse at 48% 30%, transparent 25%, rgba(0,0,0,.38) 100%),
+        repeating-linear-gradient(0deg, transparent 0 5px, rgba(0,0,0,.04) 5px 6px);
+    }
+    .paper {
+      background:
+        repeating-linear-gradient(2deg, transparent 0 5px, rgba(50,45,35,.035) 5px 6px),
+        var(--paper-light);
+      color: var(--ink);
+      border: 2px solid var(--ink);
+      box-shadow: 6px 7px 0 rgba(5,6,4,.36);
+    }
+    .stamp {
+      display: inline-block;
+      border: 3px double var(--red);
+      color: var(--red);
+      padding: 3px 8px;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .16em;
+      transform: rotate(-8deg);
+    }
+
+    /* 营业区：墙面、货架、柜台共同构成场景，而非卡片网格。 */
+    .store {
+      background:
+        linear-gradient(90deg, transparent 69.8%, rgba(0,0,0,.16) 69.8% 70%, transparent 70%),
+        repeating-linear-gradient(90deg, transparent 0 179px, rgba(216,208,186,.05) 179px 180px),
+        repeating-linear-gradient(0deg, transparent 0 119px, rgba(216,208,186,.045) 119px 120px),
+        linear-gradient(120deg, #35372f, #242620 62%, #2e3029);
+    }
+    .wall-stencil {
+      position: absolute;
+      left: 25px;
+      top: 239px;
+      color: rgba(216,208,186,.5);
+      font-size: 12px;
+      letter-spacing: .16em;
+    }
+    .rain-window {
+      position: absolute;
+      left: 24px;
+      top: 22px;
+      width: 350px;
+      height: 207px;
+      border: 10px solid #12130f;
+      outline: 2px solid #656356;
+      background: #101714;
+      box-shadow: 9px 11px 0 rgba(0,0,0,.25);
+      overflow: hidden;
+      z-index: 2;
+    }
+    .rain-window svg { width: 100%; height: 100%; display: block; }
+    .window-label {
+      position: absolute;
+      left: 12px;
+      bottom: 10px;
+      padding: 4px 8px;
+      background: var(--paper);
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      font-size: 12px;
+      letter-spacing: .12em;
+    }
+
+    .shelf {
+      position: absolute;
+      left: 24px;
+      top: 269px;
+      width: 370px;
+      height: 198px;
+      z-index: 3;
+      border-left: 8px solid #171813;
+      border-right: 8px solid #171813;
+    }
+    .shelf-heading {
+      height: 30px;
+      padding: 4px 10px;
+      background: #1b1c17;
+      color: var(--paper);
+      border-top: 2px solid #6d6a5c;
+      font-size: 14px;
+      letter-spacing: .15em;
+    }
+    .products {
+      height: 136px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      align-items: end;
+      padding: 3px 6px 9px;
+      background: rgba(12,13,10,.26);
+      border-bottom: 12px solid #141510;
+      box-shadow: 0 5px 0 #4e4c40;
+    }
+    .product { min-width: 0; text-align: center; }
+    .product svg { display: block; width: 86px; height: 72px; margin: 0 auto 1px; }
+    .product-name {
+      display: block;
+      color: var(--paper-light);
+      font-size: 15px;
+      line-height: 22px;
+      white-space: nowrap;
+    }
+    .price {
+      display: inline-block;
+      padding: 1px 6px;
+      background: var(--paper-light);
+      color: var(--ink);
+      border: 1px solid #171813;
+      font-size: 13px;
+      line-height: 18px;
+      white-space: nowrap;
+      transform: rotate(-1deg);
+    }
+    .shelf-note {
+      margin-top: 12px;
+      padding-left: 8px;
+      color: #aaa38f;
+      font-size: 12px;
+      letter-spacing: .08em;
+    }
+
+    .customer-photo {
+      position: absolute;
+      left: 420px;
+      top: 21px;
+      width: 340px;
+      height: 523px;
+      padding: 8px 8px 32px;
+      z-index: 4;
+      background: #d5cdb7;
+      border: 2px solid #11120f;
+      box-shadow: 12px 13px 0 rgba(5,6,4,.36);
+      transform: rotate(-.55deg);
+    }
+    .customer-photo::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -11px;
+      width: 80px;
+      height: 22px;
+      transform: translateX(-50%) rotate(1deg);
+      background: rgba(170,163,143,.82);
+      border-left: 1px solid #77705f;
+      border-right: 1px solid #77705f;
+      z-index: 3;
+    }
+    .customer-photo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 45%;
+      filter: saturate(.72) contrast(1.04) brightness(.91);
+      background: #15241e;
+    }
+    .photo-caption {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 7px;
+      display: flex;
+      justify-content: space-between;
+      color: #393830;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 13px;
+      letter-spacing: .08em;
+    }
+    .photo-mark {
+      position: absolute;
+      right: -16px;
+      top: 52px;
+      padding: 5px 9px;
+      background: var(--paper-light);
+      border: 1px solid var(--ink);
+      color: var(--red);
+      font-size: 12px;
+      transform: rotate(3deg);
+    }
+
+    .dialogue-paper {
+      position: absolute;
+      left: 782px;
+      top: 171px;
+      width: 282px;
+      min-height: 196px;
+      padding: 20px 20px 16px;
+      z-index: 7;
+      transform: rotate(.7deg);
+    }
+    .dialogue-paper .speaker {
+      display: block;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #89816f;
+      font-size: 14px;
+      color: #5e594d;
+    }
+    .dialogue-paper p {
+      margin: 0;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.6;
+    }
+    .dialogue-paper .stamp {
+      position: absolute;
+      right: 12px;
+      top: -20px;
+      background: rgba(238,231,211,.85);
+    }
+    .dialogue-paper small {
+      display: block;
+      margin-top: 12px;
+      color: #6c6658;
+      font-size: 12px;
+    }
+
+    .door-unit {
+      position: absolute;
+      right: 27px;
+      top: 27px;
+      width: 282px;
+      height: 541px;
+      z-index: 5;
+      perspective: 1100px;
+      background: #11120f;
+      border: 11px solid #12130f;
+      outline: 2px solid #656356;
+      box-shadow: 12px 12px 0 rgba(0,0,0,.32);
+    }
+    .door-interior {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(216,208,186,.16), transparent 35%),
+        repeating-linear-gradient(0deg, #11130f 0 74px, #494a40 74px 80px),
+        #10110e;
+    }
+    .door-interior::after {
+      content: "";
+      position: absolute;
+      left: 38px;
+      right: 30px;
+      bottom: 50px;
+      height: 120px;
+      border: 5px solid #44463c;
+      border-bottom: 0;
+      transform: skewY(-4deg);
+    }
+    .door-light {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: #c4bda7;
+      opacity: .25;
+      transition: width 1s ease .25s, opacity .3s ease;
+    }
+    .door-slab {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: 2px solid #55564d;
+      border-radius: 0;
+      background:
+        repeating-linear-gradient(88deg, transparent 0 10px, rgba(255,255,255,.014) 10px 11px),
+        linear-gradient(100deg, #3e4038, #292b26 70%, #34362f);
+      color: var(--paper-light);
+      cursor: pointer;
+      text-align: left;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transition: transform 1.2s cubic-bezier(.55,.04,.27,1) .18s;
+      backface-visibility: hidden;
+    }
+    .door-slab:hover { background-color: #45473f; }
+    .door-sign {
+      position: absolute;
+      left: 45px;
+      top: 45px;
+      width: 166px;
+      padding: 10px 8px;
+      background: var(--paper);
+      border: 2px solid #161712;
+      color: var(--ink);
+      text-align: center;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: .35em;
+      box-shadow: 4px 4px 0 rgba(0,0,0,.25);
+    }
+    .door-sub {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 119px;
+      text-align: center;
+      color: #aaa38f;
+      font-size: 12px;
+      letter-spacing: .18em;
+    }
+    .keypad {
+      position: absolute;
+      right: 22px;
+      top: 174px;
+      width: 76px;
+      padding: 9px 8px;
+      border: 3px solid #151610;
+      background: #77776b;
+      box-shadow: inset 0 0 0 2px #9a9787;
+      text-align: center;
+    }
+    .keypad .digits {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 6px;
+      background: #1c1e19;
+      color: var(--paper-light);
+      font-family: "Courier New", monospace;
+      font-size: 18px;
+      letter-spacing: .08em;
+    }
+    .keypad small { display: block; margin-top: 6px; color: #20211c; font-size: 12px; }
+    .door-handle {
+      position: absolute;
+      right: 28px;
+      top: 301px;
+      width: 16px;
+      height: 86px;
+      border: 3px solid #11120f;
+      background: #8a887b;
+      box-shadow: 4px 3px 0 rgba(0,0,0,.25);
+      transform-origin: top center;
+      transition: transform .25s ease;
+    }
+    .door-handle::before {
+      content: "";
+      position: absolute;
+      left: -15px;
+      top: 10px;
+      width: 18px;
+      height: 12px;
+      background: #8a887b;
+      border: 3px solid #11120f;
+    }
+    .door-hint {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 24px;
+      padding-top: 12px;
+      border-top: 1px solid #69695e;
+      color: var(--paper);
+      font-size: 14px;
+      text-align: center;
+      letter-spacing: .08em;
+    }
+    .door-unit.opening .door-slab { transform: rotateY(-79deg); }
+    .door-unit.opening .door-handle { transform: rotate(13deg) translateY(7px); }
+    .door-unit.opening .keypad { animation: lock-check .25s linear; }
+    .door-unit.opening .door-light { width: 100%; opacity: .2; }
+    @keyframes lock-check {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      55% { transform: translateX(3px); }
+      80% { transform: translateX(-1px); }
+    }
+
+    .counter {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 176px;
+      z-index: 6;
+      border-top: 12px solid #17140f;
+      background:
+        repeating-linear-gradient(2deg, transparent 0 13px, rgba(0,0,0,.12) 13px 15px),
+        linear-gradient(90deg, #41392d, #2e2b23 55%, #3c352a);
+      box-shadow: 0 -5px 0 #605747, inset 0 8px 0 rgba(255,255,255,.035);
+    }
+    .counter::after {
+      content: "夜班员请当面点清货品";
+      position: absolute;
+      left: 24px;
+      bottom: 15px;
+      color: rgba(216,208,186,.48);
+      font-family: "STSong", "SimSun", serif;
+      font-size: 14px;
+      letter-spacing: .16em;
+    }
+    .coffee-machine {
+      position: absolute;
+      left: 47px;
+      bottom: 124px;
+      width: 166px;
+      height: 176px;
+      z-index: 8;
+      border: 4px solid #11120e;
+      border-radius: 9px 9px 0 0;
+      background: linear-gradient(100deg, #737267, #3b3d36 52%, #606156);
+      box-shadow: 7px 8px 0 rgba(0,0,0,.3);
+    }
+    .coffee-machine .machine-top {
+      height: 42px;
+      padding: 8px 10px;
+      border-bottom: 3px solid #191a15;
+      color: var(--paper-light);
+      font-size: 14px;
+      letter-spacing: .1em;
+    }
+    .machine-light {
+      float: right;
+      width: 9px;
+      height: 9px;
+      margin-top: 4px;
+      border-radius: 50%;
+      background: var(--red);
+      border: 1px solid #24120f;
+    }
+    .spout {
+      position: absolute;
+      left: 54px;
+      top: 60px;
+      width: 45px;
+      height: 37px;
+      border: 7px solid #1b1c17;
+      border-top: 0;
+      background: #55564d;
+    }
+    .spout::after {
+      content: "";
+      position: absolute;
+      left: 13px;
+      bottom: -18px;
+      width: 7px;
+      height: 18px;
+      background: #171813;
+    }
+    .drip-tray {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 12px;
+      height: 15px;
+      border: 3px solid #191a15;
+      background: repeating-linear-gradient(90deg, #1d1e19 0 5px, #77766a 5px 7px);
+    }
+    .paper-cup {
+      position: absolute;
+      left: 242px;
+      bottom: 132px;
+      width: 59px;
+      height: 79px;
+      z-index: 8;
+      clip-path: polygon(7% 0, 93% 0, 82% 100%, 18% 100%);
+      background: var(--paper-light);
+      border-top: 6px solid #1c1d18;
+      filter: drop-shadow(5px 5px 0 rgba(0,0,0,.28));
+    }
+    .paper-cup::after {
+      content: "夜";
+      position: absolute;
+      left: 15px;
+      top: 23px;
+      color: var(--red);
+      font-family: "STSong", "SimSun", serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .scanner {
+      position: absolute;
+      left: 440px;
+      bottom: 124px;
+      width: 132px;
+      height: 68px;
+      z-index: 8;
+      border: 4px solid #11120f;
+      border-radius: 24px 24px 5px 5px;
+      background: #56574e;
+      box-shadow: 6px 6px 0 rgba(0,0,0,.3);
+      transform: skewX(-6deg);
+    }
+    .scanner-glass {
+      position: absolute;
+      left: 17px;
+      right: 17px;
+      top: 12px;
+      height: 25px;
+      border: 3px solid #191a15;
+      background: #1c211d;
+      overflow: hidden;
+    }
+    .scanner-glass::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      top: 10px;
+      height: 2px;
+      background: #a35b4e;
+    }
+    .scanner small {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 5px;
+      color: var(--paper-light);
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: .1em;
+    }
+    .receipt {
+      position: absolute;
+      left: 792px;
+      bottom: 15px;
+      width: 230px;
+      height: 168px;
+      padding: 13px 16px;
+      z-index: 9;
+      transform: rotate(-1.4deg);
+      clip-path: polygon(0 0,100% 0,100% 96%,95% 100%,90% 96%,85% 100%,80% 96%,75% 100%,70% 96%,65% 100%,60% 96%,55% 100%,50% 96%,45% 100%,40% 96%,35% 100%,30% 96%,25% 100%,20% 96%,15% 100%,10% 96%,5% 100%,0 96%);
+    }
+    .receipt h2 {
+      margin: 0 0 7px;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #6c6658;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 17px;
+      text-align: center;
+      letter-spacing: .12em;
+    }
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      line-height: 21px;
+    }
+    .receipt-code {
+      margin-top: 6px;
+      padding-top: 4px;
+      border-top: 1px dashed #6c6658;
+      font-size: 14px;
+      text-align: right;
+    }
+    .receipt-code b { color: var(--red); font-size: 19px; letter-spacing: .16em; }
+
+    /* 仓库：管线沿同一水平轴接入完整门框。 */
+    .warehouse {
+      background:
+        repeating-linear-gradient(90deg, transparent 0 159px, rgba(216,208,186,.045) 159px 160px),
+        repeating-linear-gradient(0deg, transparent 0 99px, rgba(216,208,186,.04) 99px 100px),
+        linear-gradient(115deg, #30322c, #20221e 70%, #2b2d27);
+    }
+    .warehouse::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 205px;
+      border-top: 10px solid #12130f;
+      background:
+        repeating-linear-gradient(2deg, transparent 0 14px, rgba(0,0,0,.12) 14px 16px),
+        #37332a;
+      box-shadow: 0 -4px 0 #5b5648;
+      z-index: 0;
+    }
+    .work-order {
+      position: absolute;
+      left: 26px;
+      top: 20px;
+      width: 620px;
+      height: 143px;
+      padding: 15px 20px 12px;
+      z-index: 3;
+      transform: rotate(-.35deg);
+    }
+    .work-order::before {
+      content: "";
+      position: absolute;
+      left: 268px;
+      top: -12px;
+      width: 86px;
+      height: 23px;
+      border: 3px solid #24251f;
+      border-radius: 5px 5px 0 0;
+      background: #77766a;
+    }
+    .work-order h2 {
+      margin: 0 0 8px;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 21px;
+      letter-spacing: .08em;
+    }
+    .work-order p { margin: 0; font-size: 15px; line-height: 1.65; }
+    .work-order .order-sketch {
+      position: absolute;
+      right: 20px;
+      top: 19px;
+      width: 268px;
+      height: 92px;
+    }
+    .work-order .stamp {
+      position: absolute;
+      right: 20px;
+      bottom: 7px;
+      font-size: 14px;
+      transform: rotate(-5deg);
+    }
+    .work-order .order-copy { width: 285px; }
+
+    .assembly-line {
+      position: absolute;
+      left: 25px;
+      right: 370px;
+      top: 184px;
+      height: 290px;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: 190px 220px 200px minmax(120px, 1fr);
+      align-items: center;
+    }
+    .assembly-line::before {
+      content: "";
+      position: absolute;
+      left: 92px;
+      right: 37px;
+      top: 137px;
+      height: 12px;
+      border-top: 3px solid #11120f;
+      border-bottom: 3px solid #11120f;
+      background: #77776b;
+      box-shadow: 0 3px 0 rgba(0,0,0,.25);
+      z-index: -1;
+    }
+    .assembly-line::after {
+      content: "";
+      position: absolute;
+      left: 92px;
+      right: 37px;
+      top: 140px;
+      height: 2px;
+      background: var(--copper);
+      z-index: -1;
+    }
+    .flow-arrow {
+      position: absolute;
+      top: 130px;
+      width: 0;
+      height: 0;
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-left: 16px solid var(--paper-dim);
+      z-index: 1;
+      filter: drop-shadow(2px 2px 0 #11120f);
+    }
+    .arrow-one { left: 183px; }
+    .arrow-two { left: 401px; }
+    .arrow-three { left: 602px; }
+    .component {
+      width: 184px;
+      height: 228px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--paper-light);
+      cursor: pointer;
+      position: relative;
+      justify-self: center;
+    }
+    .component svg {
+      display: block;
+      width: 176px;
+      height: 176px;
+      margin: 0 auto;
+      overflow: visible;
+      filter: drop-shadow(7px 8px 0 rgba(0,0,0,.28));
+      transform: translateY(-7px);
+      transition: transform .22s ease, filter .22s ease;
+    }
+    .component:hover svg { filter: drop-shadow(7px 8px 0 rgba(0,0,0,.28)) brightness(1.13); }
+    .component.installed svg { transform: translateY(0); filter: drop-shadow(3px 4px 0 rgba(0,0,0,.3)); }
+    .component .mount {
+      fill: rgba(16,17,15,.32);
+      stroke: var(--red);
+      stroke-width: 2;
+      stroke-dasharray: 7 6;
+    }
+    .component.installed .mount { stroke: #9b9888; opacity: .55; }
+    .component .metal { fill: #505249; stroke: #151611; stroke-width: 5; }
+    .component .metal-light { fill: #77776b; stroke: #191a15; stroke-width: 4; }
+    .component .dark { fill: #1c1e19; stroke: #10110e; stroke-width: 4; }
+    .component .copper { fill: var(--copper); stroke: #241b13; stroke-width: 4; }
+    .component .copper-line { fill: none; stroke: var(--copper); stroke-width: 8; }
+    .component .fine { fill: none; stroke: #b1aa96; stroke-width: 3; }
+    .component .lens { fill: #252c27; stroke: #8b887a; stroke-width: 5; }
+    .component-label {
+      display: block;
+      margin-top: 3px;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-shadow: 2px 2px 0 #10110e;
+    }
+    .component-action {
+      display: inline-block;
+      margin-top: 7px;
+      padding: 2px 8px;
+      border: 1px solid #8f8b7b;
+      color: #c8c0aa;
+      background: rgba(16,17,15,.7);
+      font-size: 12px;
+      line-height: 18px;
+      letter-spacing: .06em;
+    }
+    .component.installed .component-action { color: var(--paper-light); border-color: var(--paper-dim); }
+    .frame-terminal {
+      width: 90px;
+      height: 218px;
+      justify-self: end;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .frame-terminal svg { width: 88px; height: 130px; overflow: visible; }
+    .frame-terminal .component-label {
+      position: absolute;
+      left: -9px;
+      right: -9px;
+      bottom: 1px;
+      text-align: center;
+      color: var(--paper-light);
+    }
+    .frame-terminal .terminal-caption {
+      position: absolute;
+      left: -11px;
+      right: -11px;
+      bottom: -23px;
+      text-align: center;
+      color: #aaa38f;
+      font-size: 12px;
+    }
+
+    .wave-machine {
+      position: absolute;
+      left: 32px;
+      bottom: 26px;
+      width: 590px;
+      height: 190px;
+      z-index: 6;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 142px;
+      gap: 15px;
+      padding: 15px;
+      border: 4px solid #11120f;
+      border-radius: 6px;
+      background: linear-gradient(105deg, #55564d, #34362f);
+      box-shadow: 8px 9px 0 rgba(0,0,0,.32), inset 0 0 0 2px #727165;
+    }
+    .wave-screen-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 25px;
+      color: var(--paper-light);
+      font-size: 15px;
+      letter-spacing: .08em;
+    }
+    .wave-screen-label span:last-child { color: #c0b8a2; font-size: 12px; }
+    .wave-screen {
+      height: 127px;
+      margin-top: 6px;
+      border: 7px solid #171813;
+      background: #171d18;
+      box-shadow: inset 0 0 18px rgba(0,0,0,.55);
+    }
+    .wave-screen svg { display: block; width: 100%; height: 100%; }
+    .wave-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-content: start;
+      gap: 8px;
+    }
+    .knob {
+      width: 54px;
+      height: 54px;
+      margin: 4px auto 0;
+      border: 4px solid #161712;
+      border-radius: 50%;
+      background: #8a887b;
+      box-shadow: 3px 4px 0 rgba(0,0,0,.35);
+      position: relative;
+    }
+    .knob::after {
+      content: "";
+      position: absolute;
+      left: 23px;
+      top: 3px;
+      width: 3px;
+      height: 18px;
+      background: #25261f;
+      transform: rotate(24deg);
+      transform-origin: bottom;
+    }
+    .knob-label {
+      display: block;
+      margin-top: -3px;
+      color: var(--paper-light);
+      text-align: center;
+      font-size: 12px;
+    }
+    .calibrate {
+      grid-column: 1 / -1;
+      height: 38px;
+      margin-top: 7px;
+      border: 3px solid #141510;
+      border-radius: 0;
+      background: var(--paper);
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 3px 3px 0 #181914;
+    }
+    .calibrate:hover { background: var(--paper-light); }
+    .calibrate:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #181914; }
+
+    .worksheet {
+      position: absolute;
+      left: 652px;
+      bottom: 28px;
+      width: 294px;
+      height: 184px;
+      padding: 15px 18px;
+      z-index: 6;
+      transform: rotate(.7deg);
+    }
+    .worksheet h2 {
+      margin: 0 0 8px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid var(--ink);
+      font-family: "STSong", "SimSun", serif;
+      font-size: 19px;
+      letter-spacing: .12em;
+    }
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 14px;
+      line-height: 26px;
+    }
+    .check-box {
+      width: 13px;
+      height: 13px;
+      border: 2px solid #49483e;
+      display: inline-block;
+      flex: 0 0 auto;
+    }
+    .check-row.done .check-box { position: relative; }
+    .check-row.done .check-box::after {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: -5px;
+      width: 6px;
+      height: 12px;
+      border-right: 2px solid var(--red);
+      border-bottom: 2px solid var(--red);
+      transform: rotate(40deg);
+    }
+    .worksheet small { display: block; margin-top: 7px; color: #6a6456; font-size: 12px; }
+
+    .portal-wrap {
+      position: absolute;
+      right: 22px;
+      top: 16px;
+      width: 346px;
+      height: 600px;
+      z-index: 3;
+    }
+    .portal-wrap svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .portal-caption {
+      position: absolute;
+      right: 33px;
+      bottom: 28px;
+      width: 324px;
+      min-height: 73px;
+      padding: 10px 15px;
+      z-index: 6;
+      background: #1b1d18;
+      border: 2px solid #757366;
+      color: var(--paper-light);
+      box-shadow: 5px 5px 0 rgba(0,0,0,.28);
+    }
+    .portal-caption strong {
+      display: block;
+      margin-bottom: 5px;
+      font-family: "STSong", "SimSun", serif;
+      font-size: 18px;
+      letter-spacing: .12em;
+    }
+    .portal-caption span { color: #b2aa96; font-size: 13px; }
+
+    .archive-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-width: 0;
+      padding: 3px 12px;
+      border-top: 2px solid var(--ink);
+      background: var(--paper);
+      color: #36362f;
+      font-size: 14px;
+      line-height: 20px;
+      position: relative;
+      z-index: 30;
+    }
+    .archive-footer .footer-left {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .footer-marker {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      margin-right: 9px;
+      background: var(--red);
+      border: 1px solid #532b25;
+    }
+    .archive-footer .page-number {
+      flex: 0 0 auto;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      letter-spacing: .08em;
+    }
+
+    @media (max-width: 1180px) {
+      .archive { margin: 10px; height: calc(100vh - 20px); }
+      .masthead { grid-template-columns: 320px 1fr 280px; }
+      .archive-meta { display: none; }
+      .masthead { grid-template-columns: 1fr 280px; }
+      .brand { border-right: 0; }
+      .customer-photo { left: 34%; }
+      .dialogue-paper { left: 56%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition-duration: .1s !important; }
+      .door-slab { transition: opacity .1s ease !important; }
+      .door-unit.opening .door-slab { transform: none; opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="archive">
+    <header class="masthead">
+      <div class="brand">
+        <div>
+          <h1>天台夜班</h1>
+          <small>夜班记录夹 · 雨</small>
+        </div>
+        <div class="time"><span>当班时间</span>23:47</div>
+      </div>
+      <div class="archive-meta" aria-label="值班信息">
+        <span>地点：<b>楼顶便利店</b></span>
+        <span>记录人：<b>夜班员</b></span>
+        <span>天气：<b>雨，偶有静电</b></span>
+        <span>事项：<b>接待与门后装配</b></span>
+      </div>
+      <nav class="scene-tabs" aria-label="场景切换" role="tablist">
+        <button class="scene-tab" id="storeTab" role="tab" aria-selected="true" aria-controls="storeScene" data-scene="store">营业区</button>
+        <button class="scene-tab" id="warehouseTab" role="tab" aria-selected="false" aria-controls="warehouseScene" data-scene="warehouse">仓库</button>
+      </nav>
+    </header>
+
+    <main class="scene-wrap">
+      <section class="scene store active" id="storeScene" role="tabpanel" aria-labelledby="storeTab" aria-hidden="false">
+        <div class="rain-window" aria-label="雨夜窗">
+          <svg viewBox="0 0 330 187" role="img" aria-label="雨水划过对面楼房的灯火">
+            <rect width="330" height="187" fill="#101713"/>
+            <path d="M0 130 L35 112 L35 77 L78 77 L78 105 L108 105 L108 48 L159 48 L159 108 L191 108 L191 70 L235 70 L235 102 L271 102 L271 56 L318 56 L318 116 L330 116 L330 187 L0 187Z" fill="#1e2721"/>
+            <g fill="#a69b70" opacity=".55">
+              <rect x="119" y="62" width="9" height="14"/><rect x="139" y="62" width="9" height="14"/>
+              <rect x="119" y="86" width="9" height="14"/><rect x="283" y="72" width="9" height="14"/>
+              <rect x="48" y="91" width="9" height="14"/><rect x="206" y="84" width="9" height="14"/>
+            </g>
+            <g stroke="#a8afa0" stroke-width="1" opacity=".45">
+              <path d="M20 4 L7 55 M49 0 L33 67 M82 12 L69 65 M109 0 L91 74 M143 4 L126 73 M176 0 L159 68 M208 9 L190 80 M242 0 L224 70 M275 8 L258 75 M313 0 L294 76"/>
+              <path d="M28 93 L14 151 M63 81 L45 157 M98 95 L82 163 M135 79 L116 161 M176 93 L157 174 M213 80 L197 149 M253 88 L234 170 M302 84 L281 174"/>
+            </g>
+            <path d="M165 0 V187 M0 96 H330" stroke="#11120f" stroke-width="8"/>
+            <path d="M168 0 V187 M0 99 H330" stroke="#55564d" stroke-width="1" opacity=".7"/>
+          </svg>
+          <span class="window-label">雨夜 · 对面楼仍有灯</span>
+        </div>
+        <span class="wall-stencil">货架与柜台 / 每日交接</span>
+
+        <div class="shelf" aria-label="夜班商品货架">
+          <div class="shelf-heading">夜班货架</div>
+          <div class="products">
+            <div class="product">
+              <svg viewBox="0 0 100 80" aria-label="饭团">
+                <path d="M50 7 L91 70 L9 70 Z" fill="#d8d0ba" stroke="#171813" stroke-width="4"/>
+                <path d="M38 42 H62 V70 H38 Z" fill="#272b24"/>
+                <path d="M43 18 L50 12 L57 18" fill="none" stroke="#f0e8d3" stroke-width="3"/>
+                <circle cx="32" cy="51" r="2" fill="#8e8876"/><circle cx="69" cy="55" r="2" fill="#8e8876"/>
+              </svg>
+              <span class="product-name">饭团</span><span class="price">¥6</span>
+            </div>
+            <div class="product">
+              <svg viewBox="0 0 100 80" aria-label="咖啡胶囊">
+                <g stroke="#171813" stroke-width="3">
+                  <path d="M12 26 H43 L39 62 H17 Z" fill="#8b6848"/><ellipse cx="27.5" cy="26" rx="16" ry="6" fill="#b0a895"/>
+                  <path d="M55 13 H86 L82 49 H60 Z" fill="#77776b"/><ellipse cx="70.5" cy="13" rx="16" ry="6" fill="#d0c7ae"/>
+                  <path d="M48 49 H78 L75 72 H52 Z" fill="#914f45"/><ellipse cx="63" cy="49" rx="15" ry="5" fill="#c3baa2"/>
+                </g>
+              </svg>
+              <span class="product-name">咖啡胶囊</span><span class="price">¥4</span>
+            </div>
+            <div class="product">
+              <svg viewBox="0 0 100 80" aria-label="电池">
+                <g stroke="#171813" stroke-width="3">
+                  <path d="M23 16 H43 V69 H23 Z" fill="#aaa38f"/><path d="M28 10 H38 V16 H28 Z" fill="#8b6848"/>
+                  <path d="M55 8 H76 V69 H55 Z" fill="#d0c7ae"/><path d="M60 3 H71 V8 H60 Z" fill="#8b6848"/>
+                  <path d="M23 43 H43 V58 H23 Z M55 38 H76 V55 H55 Z" fill="#914f45"/>
+                  <path d="M30 27 H36 M33 24 V30 M62 22 H69" stroke="#272820" stroke-width="2"/>
+                </g>
+              </svg>
+              <span class="product-name">电池</span><span class="price">¥8</span>
+            </div>
+          </div>
+          <div class="shelf-note">价签朝下，存货当面点清。</div>
+        </div>
+
+        <figure class="customer-photo" aria-label="神秘顾客留影">
+          <img src="assets/customer.jpg" alt="穿深色高领外套的年轻顾客，脸部清晰，手边放着小票">
+          <span class="photo-mark">目击留影</span>
+          <figcaption class="photo-caption"><span>神秘顾客</span><span>23:47</span></figcaption>
+        </figure>
+
+        <div class="dialogue-paper paper" aria-label="顾客对话">
+          <span class="stamp">未结</span>
+          <span class="speaker">神秘顾客 / 对话记录</span>
+          <p>“小票上的东西，帮我备齐。门后那台机器……今晚必须转起来。”</p>
+          <small>他没有带伞，肩头却是干的。</small>
+        </div>
+
+        <div class="door-unit" id="doorUnit">
+          <div class="door-interior" aria-hidden="true"><span class="door-light"></span></div>
+          <button class="door-slab" id="warehouseDoor" aria-label="仓库门，点击演示输入密码 648 并开门">
+            <span class="door-sign">仓库</span>
+            <span class="door-sub">非当班人员勿入</span>
+            <span class="keypad"><span class="digits">648</span><small>密码已核</small></span>
+            <span class="door-handle" aria-hidden="true"></span>
+            <span class="door-hint">点击演示开门</span>
+          </button>
+        </div>
+
+        <div class="counter" aria-hidden="true"></div>
+        <div class="coffee-machine" aria-label="咖啡机">
+          <div class="machine-top">咖啡机<span class="machine-light"></span></div>
+          <div class="spout"></div><div class="drip-tray"></div>
+        </div>
+        <div class="paper-cup" aria-label="纸杯"></div>
+        <div class="scanner" aria-label="扫码器"><div class="scanner-glass"></div><small>扫码器</small></div>
+        <div class="receipt paper" aria-label="夜班销售小票">
+          <h2>夜班销售小票</h2>
+          <div class="receipt-row"><span>饭团 × 1</span><span>¥6</span></div>
+          <div class="receipt-row"><span>咖啡胶囊 × 1</span><span>¥4</span></div>
+          <div class="receipt-row"><span>电池 × 1</span><span>¥8</span></div>
+          <div class="receipt-code">合计 <b>¥18</b>　密码 <b>648</b></div>
+        </div>
+      </section>
+
+      <section class="scene warehouse" id="warehouseScene" role="tabpanel" aria-labelledby="warehouseTab" aria-hidden="true">
+        <div class="work-order paper">
+          <div class="order-copy">
+            <h2>门后装配 · 值班图纸</h2>
+            <p>先接能源，再装稳定器与聚焦环。<br>导管保持同轴，最后接入门框。</p>
+          </div>
+          <svg class="order-sketch" viewBox="0 0 268 92" aria-label="能源接口到门框的顺序草图">
+            <g fill="none" stroke="#49483e" stroke-width="2">
+              <circle cx="26" cy="42" r="17"/><path d="M20 34 V43 M32 34 V43 M43 42 H83"/>
+              <path d="M85 27 H123 L133 42 L123 57 H85 L75 42 Z M94 29 V55 M103 29 V55 M112 29 V55"/>
+              <path d="M133 42 H159"/><circle cx="181" cy="42" r="20"/><circle cx="181" cy="42" r="11"/>
+              <path d="M201 42 H224"/><path d="M230 73 V34 C230 4 262 4 262 34 V73"/>
+            </g>
+            <g fill="#914f45"><path d="M64 37 L74 42 L64 47 Z"/><path d="M145 37 L155 42 L145 47 Z"/><path d="M211 37 L221 42 L211 47 Z"/></g>
+            <g fill="#49483e" font-size="12" font-family="Microsoft YaHei"><text x="7" y="83">能源</text><text x="89" y="83">稳定</text><text x="165" y="83">聚焦</text><text x="234" y="87">门框</text></g>
+          </svg>
+          <span class="stamp">勿倒置</span>
+        </div>
+
+        <div class="assembly-line" aria-label="能源接口到稳定器、聚焦环、门框的装配管线">
+          <span class="flow-arrow arrow-one" aria-hidden="true"></span>
+          <span class="flow-arrow arrow-two" aria-hidden="true"></span>
+          <span class="flow-arrow arrow-three" aria-hidden="true"></span>
+
+          <button class="component socket" aria-pressed="false" data-component="能源接口">
+            <svg viewBox="0 0 180 170" aria-hidden="true">
+              <circle class="mount" cx="88" cy="82" r="70"/>
+              <circle class="metal" cx="88" cy="82" r="59"/>
+              <circle class="metal-light" cx="88" cy="82" r="45"/>
+              <circle class="dark" cx="88" cy="82" r="34"/>
+              <path class="copper" d="M56 28 H70 V52 H56 Z M106 28 H120 V52 H106 Z"/>
+              <path d="M72 64 V82 M104 64 V82" stroke="#b79a71" stroke-width="10" stroke-linecap="round"/>
+              <path d="M76 105 Q88 115 100 105" fill="none" stroke="#8b6848" stroke-width="7"/>
+              <circle cx="88" cy="27" r="4" fill="#1b1c17"/><circle cx="88" cy="137" r="4" fill="#1b1c17"/>
+              <path class="fine" d="M31 77 H42 M134 77 H145"/>
+            </svg>
+            <span class="component-label">能源接口</span>
+            <span class="component-action">点击归位</span>
+          </button>
+
+          <button class="component stabilizer" aria-pressed="false" data-component="线圈稳定器">
+            <svg viewBox="0 0 190 170" aria-hidden="true">
+              <path class="mount" d="M42 12 H146 L174 82 L146 152 H42 L14 82 Z"/>
+              <path class="metal" d="M50 26 H138 L157 82 L138 138 H50 L31 82 Z"/>
+              <path class="dark" d="M55 53 H133 V112 H55 Z"/>
+              <path class="copper-line" d="M64 54 V111 M77 54 V111 M90 54 V111 M103 54 V111 M116 54 V111 M129 54 V111"/>
+              <path d="M57 47 H135 M57 118 H135" stroke="#aaa38f" stroke-width="7"/>
+              <path class="metal-light" d="M26 36 H50 V65 H26 Z M138 100 H162 V129 H138 Z"/>
+              <path class="copper" d="M15 72 H37 V92 H15 Z M151 72 H173 V92 H151 Z"/>
+              <circle cx="43" cy="35" r="5" fill="#1c1d18"/><circle cx="145" cy="130" r="5" fill="#1c1d18"/>
+            </svg>
+            <span class="component-label">线圈稳定器</span>
+            <span class="component-action">点击归位</span>
+          </button>
+
+          <button class="component focus-ring" aria-pressed="false" data-component="同心聚焦环">
+            <svg viewBox="0 0 180 170" aria-hidden="true">
+              <circle class="mount" cx="88" cy="82" r="72"/>
+              <circle class="metal" cx="88" cy="82" r="61"/>
+              <circle class="metal-light" cx="88" cy="82" r="49"/>
+              <circle class="dark" cx="88" cy="82" r="38"/>
+              <circle class="lens" cx="88" cy="82" r="27"/>
+              <circle cx="88" cy="82" r="15" fill="#667066" stroke="#b1aa96" stroke-width="3"/>
+              <path d="M76 69 Q88 57 103 68" fill="none" stroke="#d0c7ae" stroke-width="4" opacity=".55"/>
+              <path class="copper" d="M80 5 H96 V26 H80 Z M80 138 H96 V159 H80 Z M12 74 H33 V90 H12 Z M143 74 H164 V90 H143 Z"/>
+              <path class="fine" d="M88 30 V44 M88 120 V134 M36 82 H50 M126 82 H140"/>
+            </svg>
+            <span class="component-label">同心聚焦环</span>
+            <span class="component-action">点击归位</span>
+          </button>
+
+          <div class="frame-terminal" aria-label="门框接线端">
+            <svg viewBox="0 0 90 130" aria-hidden="true">
+              <circle cx="43" cy="65" r="35" fill="#22241f" stroke="#914f45" stroke-width="2" stroke-dasharray="6 5"/>
+              <circle cx="43" cy="65" r="27" fill="#65665c" stroke="#151610" stroke-width="5"/>
+              <circle cx="43" cy="65" r="14" fill="#171813" stroke="#8b6848" stroke-width="5"/>
+              <path d="M70 65 H91" stroke="#8b6848" stroke-width="9"/>
+              <path d="M70 59 H91 M70 71 H91" stroke="#171813" stroke-width="2"/>
+            </svg>
+            <span class="component-label">门框</span>
+            <span class="terminal-caption">末端接口</span>
+          </div>
+        </div>
+
+        <div class="wave-machine" aria-label="波形校准仪">
+          <div>
+            <div class="wave-screen-label"><strong>波形校准</strong><span id="waveState">偏差待校正</span></div>
+            <div class="wave-screen">
+              <svg viewBox="0 0 390 110" preserveAspectRatio="none" aria-label="机械波形显示屏">
+                <g stroke="#596056" stroke-width="1" opacity=".35">
+                  <path d="M0 22 H390 M0 44 H390 M0 66 H390 M0 88 H390"/>
+                  <path d="M39 0 V110 M78 0 V110 M117 0 V110 M156 0 V110 M195 0 V110 M234 0 V110 M273 0 V110 M312 0 V110 M351 0 V110"/>
+                </g>
+                <path d="M0 55 H390" stroke="#a8a18e" stroke-width="1" opacity=".5"/>
+                <path id="wavePath" d="M0 58 C16 58 18 26 34 30 S50 91 68 83 S91 17 110 31 S127 98 149 76 S169 23 192 40 S211 91 231 71 S255 13 275 35 S295 92 317 64 S351 41 390 54" fill="none" stroke="#d0c7ae" stroke-width="3"/>
+                <path d="M0 55 C32 55 32 22 65 22 S98 88 130 88 S163 22 195 22 S228 88 260 88 S293 22 325 22 S358 88 390 88" fill="none" stroke="#914f45" stroke-width="1.5" stroke-dasharray="5 5" opacity=".65"/>
+              </svg>
+            </div>
+          </div>
+          <div class="wave-controls">
+            <div><div class="knob"></div><span class="knob-label">频率</span></div>
+            <div><div class="knob"></div><span class="knob-label">相位</span></div>
+            <button class="calibrate" id="calibrateButton">校准波形</button>
+          </div>
+        </div>
+
+        <div class="worksheet paper">
+          <h2>装配核对单</h2>
+          <div class="check-row done"><span class="check-box"></span><span>插座铜端子无氧化</span></div>
+          <div class="check-row"><span class="check-box"></span><span>线圈两端配重一致</span></div>
+          <div class="check-row"><span class="check-box"></span><span>三组镜片保持同心</span></div>
+          <small>点击组件可演示吸附归位。</small>
+        </div>
+
+        <div class="portal-wrap" aria-label="完整传送门">
+          <svg viewBox="0 0 360 610" role="img" aria-label="带同心机械环与支脚的完整拱形传送门">
+            <path d="M54 570 H112 M248 570 H306" stroke="#11120f" stroke-width="18"/>
+            <path class="portal-foot" d="M36 556 H126 V582 H36 Z M234 556 H324 V582 H234 Z" fill="#55564d" stroke="#151610" stroke-width="6"/>
+            <path d="M68 553 V222 C68 119 110 49 180 49 C250 49 292 119 292 222 V553" fill="none" stroke="#11120f" stroke-width="46"/>
+            <path d="M68 553 V222 C68 119 110 49 180 49 C250 49 292 119 292 222 V553" fill="none" stroke="#66675d" stroke-width="34"/>
+            <path d="M68 553 V222 C68 119 110 49 180 49 C250 49 292 119 292 222 V553" fill="none" stroke="#929080" stroke-width="4"/>
+            <path d="M94 553 V226 C94 137 126 81 180 81 C234 81 266 137 266 226 V553" fill="#141a16" stroke="#1a1b16" stroke-width="8"/>
+            <path d="M106 548 V230 C106 151 135 96 180 96 C225 96 254 151 254 230 V548" fill="none" stroke="#8b6848" stroke-width="4" stroke-dasharray="12 9"/>
+            <path d="M116 542 V233 C116 162 141 108 180 108 C219 108 244 162 244 233 V542" fill="none" stroke="#4c544a" stroke-width="3"/>
+            <g fill="none" stroke="#555e52" opacity=".65">
+              <ellipse cx="180" cy="321" rx="52" ry="177" stroke-width="2"/>
+              <ellipse cx="180" cy="321" rx="34" ry="146" stroke-width="2" stroke-dasharray="5 8"/>
+              <path d="M180 147 V496 M133 321 H227" stroke-width="1"/>
+              <path d="M142 208 Q180 183 218 208 M139 430 Q180 458 221 430" stroke-width="3"/>
+            </g>
+            <g fill="#8b6848" stroke="#171813" stroke-width="4">
+              <path d="M49 218 H84 V247 H49 Z M276 218 H311 V247 H276 Z"/>
+              <path d="M49 360 H84 V389 H49 Z M276 360 H311 V389 H276 Z"/>
+              <path d="M49 497 H84 V526 H49 Z M276 497 H311 V526 H276 Z"/>
+            </g>
+            <g fill="#1b1c17">
+              <circle cx="68" cy="167" r="6"/><circle cx="292" cy="167" r="6"/>
+              <circle cx="68" cy="290" r="6"/><circle cx="292" cy="290" r="6"/>
+              <circle cx="68" cy="432" r="6"/><circle cx="292" cy="432" r="6"/>
+              <circle cx="102" cy="89" r="6"/><circle cx="258" cy="89" r="6"/>
+            </g>
+            <path d="M54 290 H24 V324" fill="none" stroke="#77776b" stroke-width="12"/>
+            <path d="M54 290 H24 V324" fill="none" stroke="#171813" stroke-width="2"/>
+            <circle cx="24" cy="332" r="14" fill="#65665c" stroke="#151610" stroke-width="5"/>
+            <path d="M62 576 H110 M250 576 H310" stroke="#a29d89" stroke-width="3"/>
+          </svg>
+        </div>
+        <div class="portal-caption">
+          <strong>门框 / 同轴装配终端</strong>
+          <span>全貌检查：门楣、两侧机械环与支脚均在视野内。</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="archive-footer">
+      <span class="footer-left"><span class="footer-marker"></span><span id="feedback">先接过小票，再检查门后的装配台。</span></span>
+      <span class="page-number" id="pageNumber">记录 01 / 营业区</span>
+    </footer>
+  </div>
+
+  <script>
+    (() => {
+      const tabs = [...document.querySelectorAll('.scene-tab')];
+      const scenes = [...document.querySelectorAll('.scene')];
+      const feedback = document.getElementById('feedback');
+      const pageNumber = document.getElementById('pageNumber');
+      const doorUnit = document.getElementById('doorUnit');
+      const doorButton = document.getElementById('warehouseDoor');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let doorTimer = null;
+
+      function switchScene(name, fromDoor = false) {
+        if (!fromDoor && doorTimer) {
+          clearTimeout(doorTimer);
+          doorTimer = null;
+          doorUnit.classList.remove('opening');
+        }
+        tabs.forEach(tab => tab.setAttribute('aria-selected', String(tab.dataset.scene === name)));
+        scenes.forEach(scene => {
+          const active = scene.id === name + 'Scene';
+          scene.classList.toggle('active', active);
+          scene.setAttribute('aria-hidden', String(!active));
+        });
+        if (name === 'warehouse') {
+          feedback.textContent = '按导管顺序装配：能源接口、稳定器、聚焦环，最后接入门框。';
+          pageNumber.textContent = '记录 02 / 仓库';
+        } else {
+          feedback.textContent = '先接过小票，再检查门后的装配台。';
+          pageNumber.textContent = '记录 01 / 营业区';
+        }
+      }
+
+      tabs.forEach(tab => tab.addEventListener('click', () => switchScene(tab.dataset.scene)));
+
+      doorButton.addEventListener('click', () => {
+        if (doorTimer) return;
+        doorUnit.classList.add('opening');
+        feedback.textContent = '密码 648 已核对，锁舌回缩，仓库门正在开启。';
+        doorTimer = setTimeout(() => {
+          doorTimer = null;
+          switchScene('warehouse', true);
+          doorUnit.classList.remove('opening');
+        }, reducedMotion.matches ? 120 : 1450);
+      });
+
+      document.querySelectorAll('.component').forEach(component => {
+        component.addEventListener('click', () => {
+          const installed = component.classList.toggle('installed');
+          component.setAttribute('aria-pressed', String(installed));
+          component.querySelector('.component-action').textContent = installed ? '已吸附归位' : '点击归位';
+          feedback.textContent = installed
+            ? component.dataset.component + '已沿匹配轮廓吸附归位。'
+            : component.dataset.component + '已移出安装轮廓，可重新归位。';
+        });
+      });
+
+      const calibrateButton = document.getElementById('calibrateButton');
+      const wavePath = document.getElementById('wavePath');
+      const waveState = document.getElementById('waveState');
+      let calibrated = false;
+      calibrateButton.addEventListener('click', () => {
+        calibrated = !calibrated;
+        wavePath.setAttribute('d', calibrated
+          ? 'M0 55 C32 55 32 25 65 25 S98 85 130 85 S163 25 195 25 S228 85 260 85 S293 25 325 25 S358 85 390 85'
+          : 'M0 58 C16 58 18 26 34 30 S50 91 68 83 S91 17 110 31 S127 98 149 76 S169 23 192 40 S211 91 231 71 S255 13 275 35 S295 92 317 64 S351 41 390 54');
+        waveState.textContent = calibrated ? '同轴波形已对齐' : '偏差待校正';
+        calibrateButton.textContent = calibrated ? '恢复偏差' : '校准波形';
+        feedback.textContent = calibrated ? '校准完成：实线波形已与参考刻度对齐。' : '已恢复原始波形，可重新校准。';
+      });
+    })();
+  </script>
+</body>
+</html>

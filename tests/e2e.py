@@ -47,7 +47,7 @@ SANITY_RELIC_ID = _extract_const("SANITY_RELIC_ID")
 RELIC_CONFIGURED = SANITY_RELIC_ID != "PENDING_UPSTREAM_SANITY_RELIC_ID"
 FAIL_REASON = re.search(r"const FAIL_REASON = '([^']+)'", HANDOFF_SRC).group(1)
 
-PRICES = {"onigiri": 6, "coffee_capsule": 4, "battery": 8}
+PRICES = {"onigiri": 16, "coffee_capsule": 24, "battery": 38}
 PARTS = ("energy", "stabilizer", "focus")
 CABLE_ROUTE = (("energy", "stabilizer"), ("stabilizer", "focus"), ("focus", "frame"))
 DIAL_TARGETS = (("amplitude", 2), ("frequency", 3), ("phase", 1))
@@ -262,9 +262,11 @@ def play_store(page, order, expected_hook):
     page.click(tid("brew-start"))
     page.wait_for_selector(tid("serve-coffee"), state="visible")
     page.click(tid("serve-coffee"))
+    page.wait_for_selector(tid("payment-closeup"), state="visible")
+    page.click(tid("closeup-close"))
     page.wait_for_selector(tid("blueprint"), state="visible")
     page.wait_for_selector(tid("warehouse-lock"), state="visible")
-    code = "".join(str(PRICES[p]) for p in order)
+    code = "".join(str(PRICES[p] % 10) for p in order)
     for digit in code:
         page.click(tid(f"lock-key-{digit}"))
     page.click(tid("lock-submit"))
@@ -441,7 +443,9 @@ def test_embedded_updated_save_keeps_progress(harness):
         frame.click(tid("brew-start"))
         frame.wait_for_selector(tid("serve-coffee"), state="visible")
         frame.click(tid("serve-coffee"))
-        for digit in "864":  # battery(8)→onigiri(6)→coffee_capsule(4)
+        frame.wait_for_selector(tid("payment-closeup"), state="visible")
+        frame.click(tid("closeup-close"))
+        for digit in "864":  # battery(38)→onigiri(16)→coffee_capsule(24)，取红字个位
             frame.click(tid(f"lock-key-{digit}"))
         frame.click(tid("lock-submit"))
         frame.wait_for_selector("[data-scene='warehouse']")
