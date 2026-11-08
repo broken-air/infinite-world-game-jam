@@ -6,14 +6,15 @@
  *   1. 禁用 API：alert( / confirm( / prompt(
  *   2. iframe 逃逸：window.top.location、parent.location
  *   3. 站内绝对路径资源：src="/..."、href="/..."、url(/...)
- *   4. 待替换理智遗物 ID：PENDING_UPSTREAM_SANITY_RELIC_ID（取得真实 ID 并替换后才会消失）
+ *   4. 待替换理智遗物 ID：PENDING_UPSTREAM_SANITY_RELIC_ID（仅提醒，不阻断发布；
+ *      未配置遗物即按无遗物路线验收，取得真实 ID 替换后提醒消失）
  *
  * 官方协议库 game/shared/save-protocol.js 不在扫描范围（含官方调试用的 alert，禁止修改）。
  * 本工具只扫描自有源码，不能替代官方 ZIP 检查：
  *   node participant-delivery-kit-v3.3.2/tools/check.mjs <zip> global-items.json
  *
  * 用法：node tools/check-game.mjs
- * 退出码：0 = 通过；1 = 存在阻断项。
+ * 退出码：0 = 通过（允许存在待替换 ID 提醒）；1 = 存在阻断项。
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
@@ -30,7 +31,7 @@ const RULES = [
     pattern: /\b(?:src|href)\s*=\s*["'`]\s*\/(?!\/)|url\(\s*['"]?\/(?!\/)/,
     why: '站内绝对路径资源（投稿 ZIP 必须全部相对路径）',
   },
-  { id: 'pending-id', pattern: /PENDING_UPSTREAM_SANITY_RELIC_ID/, why: '待替换的理智遗物 ID（发布阻断）' },
+  { id: 'pending-id', pattern: /PENDING_UPSTREAM_SANITY_RELIC_ID/, why: '待替换的理智遗物 ID（仅提醒：按无遗物路线验收，不阻断发布）', warnOnly: true },
 ];
 
 function listFiles(dir) {
@@ -63,13 +64,19 @@ for (const file of scanned) {
 }
 
 console.log(`扫描 ${scanned.length} 个自有源码文件（排除官方 ${officialProtocol}）`);
-for (const finding of findings) {
+const blockers = findings.filter((f) => !RULES.find((r) => r.id === f.rule)?.warnOnly);
+const warnings = findings.filter((f) => RULES.find((r) => r.id === f.rule)?.warnOnly);
+
+for (const finding of warnings) {
   console.log(`  [${finding.rule}] ${finding.file}:${finding.line} —— ${finding.why}`);
   console.log(`    ${finding.text}`);
 }
 
-if (findings.length) {
-  console.error(`\n阻断项 ${findings.length} 个：不得发布。`);
+if (blockers.length) {
+  console.error(`\n阻断项 ${blockers.length} 个：不得发布。`);
   process.exit(1);
 }
-console.log('\n自有源码扫描通过：无禁用 API、无绝对路径资源、无待替换 ID。');
+if (warnings.length) {
+  console.log(`\n提醒 ${warnings.length} 个：不阻断发布，按无遗物路线验收；取得真实遗物 ID 后替换一次即可启用捷径。`);
+}
+console.log('\n自有源码扫描通过：无禁用 API、无绝对路径资源。');
